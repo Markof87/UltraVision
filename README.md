@@ -1,7 +1,7 @@
 # Human Action Recognition for Human-Robot Interaction (HRI)
 
 ## 1. Project Overview
-In collaborative robotics and smart environments, computer vision systems are essential for understanding human behavior to ensure operational safety and provide contextual assistance [1]. This project develops a robust system capable of analyzing temporal image sequences to detect and classify six fundamental human actions:
+In collaborative robotics and smart environments, computer vision systems are essential for understanding human behavior to ensure operational safety and provide contextual assistance. This project develops a robust system capable of analyzing temporal image sequences to detect and classify six fundamental human actions:
 *   **Walking**
 *   **Jogging**
 *   **Running**
