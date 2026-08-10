@@ -136,7 +136,7 @@ void sequences_visualization(const std::vector<SequenceData>& all_sequences,
             cv::resize(frame, resized_frame, cv::Size(640, 480));
 
             cv::imshow(seq.complete_name, resized_frame);
-            char key = (char)cv::waitKey(40); // 25 FPS
+            char key = (char)cv::waitKey(20); // 25 FPS
             
             if (key == 'q' || key == 'Q') {
                 // aggiunto "Q" nel caso in cui si avesse il blocco maiuscole attivo
@@ -148,5 +148,5 @@ void sequences_visualization(const std::vector<SequenceData>& all_sequences,
         cv::destroyWindow(seq.complete_name);
     }
 
-    std::cout << "[INFO] Visualization completed. Showed " << showed << " chosen sequences " << std::endl;
+    std::cout << "\n[INFO] Visualization completed. " << showed << " sequences displayed." << std::endl;
 }

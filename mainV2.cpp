@@ -37,13 +37,13 @@ int main() {
         
         std::cin.ignore();  // pulisce il buffer del terminale prima di leggere le stringhe
 
-        std::cout << "Action (boxing, walking, running...)? ";
+        std::cout << "Action (boxing, handclapping, handwaving, jogging, walking, running)? ";
         std::getline(std::cin, action);
 
-        std::cout << "Person (es. person01, person02...)? ";
+        std::cout << "Person (person01, person02, person03)? ";
         std::getline(std::cin, person);
 
-        std::cout << "Environment / Scenario (es. d1, d2, d3, d4)? ";
+        std::cout << "Environment / Scenario (d1, d2, d3, d4)? ";
         std::getline(std::cin, env);
     } else {
         std::cout << "\n[INFO] No choices applied. All sequences will be displayed.\n";
