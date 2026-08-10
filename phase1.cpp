@@ -6,7 +6,7 @@
 
 namespace fs = std::filesystem;
 
-// Struttura per contenere i dati di una singola sequenza e i suoi tag
+// Data Structure containing sequence's informations
 struct SequenceData {
     std::vector<cv::Mat> frames;
     std::string action;
@@ -15,12 +15,12 @@ struct SequenceData {
     std::string complete_name;
 };
 
-// Funzione per caricare tutte le 72 sequenze in memoria
-// restituisce un vettore di SequenceData (le sequenze con i vari tag (azione, persona, environment))
-// riceve in ingresso il percorso della cartella principale (Sequences)
+// Function that loads all the 72 sequences in memory
+// returns a vector of <SequenceData>
+// receive as input the main folder path (Sequences' path)
 std::vector<SequenceData> load_sequences(const std::string& main_folder_path) {
 
-    // inizializzazione del vettore che conterrà le 72 sequenze
+    // Initialize the vector
     std::vector<SequenceData> all_sequences;
     int seq_counter = 0;
 
@@ -102,6 +102,58 @@ std::vector<SequenceData> load_sequences(const std::string& main_folder_path) {
     std::cout << "[INFO] Successfully loaded " << seq_counter << " sequences" << std::endl;
     return all_sequences;
 }
+
+// Function that allows to make receive choices
+// checks if the input is valid. If not, it skips it
+std::string get_valid_choice(const std::string& type){
+    std::string input;
+    std::vector<std::string> valid_options;
+    std::string prompt_msg;
+
+    // Configure valid options based on the requested type
+    if (type == "action") {
+        valid_options = {"boxing", "handclapping", "handwaving", "walking", "jogging", "running"};
+        prompt_msg = "Action (boxing, handclapping, handwaving, walking, jogging, running)? ";
+    } 
+        else if (type == "person") {
+            valid_options = {"person01", "person02", "person03"};
+            prompt_msg = "Person (person01, person02, person03)? ";
+        } 
+        else if (type == "env") {
+            valid_options = {"d1", "d2", "d3", "d4"};
+            prompt_msg = "Environment / Scenario (d1, d2, d3, d4)? ";
+        } 
+        else {
+            return "";
+        }
+
+    std::cout << prompt_msg;
+    std::getline(std::cin, input);
+
+    // If the user leaves it blank (presses Enter), skip it
+    if (input.empty()) {
+        return "";
+    }
+
+
+    // Check if the input matches any of the valid options
+    bool is_valid = false;
+    for (size_t i = 0; i < valid_options.size(); i++) {
+        if (valid_options[i] == input) {
+            is_valid = true;
+            break; // Found a match, exit the loop
+        }
+    }
+
+    // If the choice is valid, returns the input; otherwise, warns the user and skips it
+    if (is_valid) {
+        return input;
+    } else {
+        std::cout << "[WARNING] Invalid choice! Skipping this choice.\n";
+        return "";
+    }
+}
+
 
 // Funzione di visualizzazione con opzione di scelta per azione, persona ed environment
 // prende in input il vettore con tutte le sequenze caricate e tre stringhe per la scelta di cosa visualizzare

@@ -5,7 +5,7 @@
 #include <string>
 #include <opencv2/opencv.hpp>
 
-// Struttura dati per contenere i frame e i relativi tag della sequenza
+// Data Structure containing sequence's informations
 struct SequenceData {
     std::vector<cv::Mat> frames;
     std::string action;
@@ -14,15 +14,21 @@ struct SequenceData {
     std::string nome_completo;
 };
 
-// Dichiarazione della funzione di caricamento delle sequenze
+// Function that loads all the sequences 
 std::vector<SequenceData> load_sequences(const std::string& main_folder_path);
 
 
-// Dichiarazione della funzione di visualizzazione con possibile scelta
+// Function that allows to receive valid choices
+std::string get_valid_choice(const std::string& type);
+
+
+// Function that display a/some chosen sequences
 void sequences_visualization(const std::vector<SequenceData>& tutte_le_sequenze, 
                              std::string action_filter = "", 
                              std::string persona_filter = "", 
                              std::string env_filter = "");
+
+
 
 
 #endif // PHASE1_HPP
