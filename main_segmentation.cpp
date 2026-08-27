@@ -16,9 +16,10 @@ int main() {
         std::cout << "2. Otsu-guided Watershed (with edge dilation trackbar)\n";
         std::cout << "3. Edge Detection (Sobel + Otsu)\n";
         std::cout << "4. Contrast stretching test (Stretching + Sobel + Otsu)\n";
+        std::cout << "5. Otsu Grid 2x2 with Morphological Cleaning\n";
         std::cout << "0. Exit\n";
         std::cout << "---------------------------------------------------------\n";
-        std::cout << "Select a test to run (0-4): ";
+        std::cout << "Select a test to run (0-5): ";
         
         std::cin >> choice;
 
@@ -51,6 +52,10 @@ int main() {
                 std::cout << "--> Starting Stretching + Sobel + Otsu...\n";
                 // Still tweaking the LUT trackbars for this one
                 test_stretching_then_sobel_then_otsu();
+                break;
+            case 5:
+                std::cout << "--> Starting Otsu Grid 2x2...\n";
+                test_otsu_4regions();
                 break;
             case 0:
                 std::cout << "Exiting. Bye!\n";

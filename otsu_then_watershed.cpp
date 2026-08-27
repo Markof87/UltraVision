@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <opencv2/opencv.hpp>
 #include <filesystem>
-#include "tecniche_segmentazione.h" // Aggiunto!
+#include "tecniche_segmentazione.h" 
 
 namespace fs = std::filesystem;
 
