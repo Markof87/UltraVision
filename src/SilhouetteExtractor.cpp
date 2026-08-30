@@ -1,10 +1,10 @@
-#include "SilhouetteExtractor.h"
-
 /**
  * @file SilhouetteExtractor.cpp
  * @brief Implementation of the SilhouetteExtractor class.
  * @author Marco Fabiani
  */
+
+#include "SilhouetteExtractor.h"
 
 SilhouetteExtractor::SilhouetteExtractor() {
     // Constructor implementation (if needed)

@@ -1,10 +1,10 @@
-#include "FilterTechniques.h"
-
 /**
  * @file FilterTechniques.cpp
  * @brief Implementation of the FilterTechniques class.
  * @author Matteo Longo
  */
+
+#include "FilterTechniques.h"
 
 cv::Mat FilterTechniques::sobel_filter(const cv::Mat& frame) {
     cv::Mat grad_x, grad_y;
