@@ -10,6 +10,39 @@
 
 namespace Utils 
 {
+    void loadArgumentParameters(cv::CommandLineParser& parser, std::string& action, int& personId, int& scenarioId)
+    {
+        const std::string actions[] = {"boxing", "handclapping", "handwaving", "jogging", "running", "walking"};
+
+        action = parser.get<std::string>("action");
+        personId = parser.get<int>("person");
+        scenarioId = parser.get<int>("scenario");
+
+        // Check if the command line arguments are valid
+        if(!parser.check())
+        {
+            parser.printErrors();
+        }
+
+        // if the lowercase of action is not in the list of actions, print an error message and exit
+        if(!action.empty() && std::find(std::begin(actions), std::end(actions), action) == std::end(actions))
+        {
+            std::cerr << "Invalid action name: " << action << std::endl;
+        }
+
+        // if personId is not 1, 2, or 3, print an error message and exit
+        if(personId != 0 && (personId < 1 || personId > 3))
+        {
+            std::cerr << "Invalid person ID: " << personId << std::endl;
+        }
+
+        // if scenarioId is not 1, 2, 3, or 4, print an error message and exit
+        if(scenarioId != 0 && (scenarioId < 1 || scenarioId > 4))
+        {
+            std::cerr << "Invalid scenario ID: " << scenarioId << std::endl;
+        }
+    }
+
     std::vector<cv::Mat> loadDataset(const std::string& basePath, const std::string& actionName, int personId, int scenarioId)
     {
         std::vector<cv::Mat> dataset;
@@ -48,12 +81,15 @@ namespace Utils
         return dataset;
     }
 
-    void showDataset(const std::vector<cv::Mat>& dataset, const std::string& windowName) 
+    void showDataset(const std::vector<cv::Mat>& dataset, const std::vector<cv::Rect>& boundingBoxes, const std::string& windowName) 
     {
-        for (const auto& image : dataset) 
+        for (size_t i = 0; i < dataset.size(); ++i) 
         {
             cv::Mat imgResize;
-            cv::resize(image, imgResize, cv::Size(600, 600), 0, 0, cv::INTER_NEAREST); 
+            cv::resize(dataset[i], imgResize, cv::Size(600, 600), 0, 0, cv::INTER_NEAREST); 
+
+            // Draw the bounding box on the image
+            cv::rectangle(imgResize, boundingBoxes[i], cv::Scalar(0, 0, 255), 2);
 
             cv::imshow(windowName, imgResize);
             

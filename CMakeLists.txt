@@ -13,6 +13,7 @@ add_library(UltraVisionCore STATIC
     src/SegmentationTechniques.cpp
     src/utils/Utils.cpp
     src/TestingFunctions.cpp
+    src/TrackingPerson.cpp
 )
 
 target_link_libraries(UltraVisionCore PRIVATE ${OpenCV_LIBS})
