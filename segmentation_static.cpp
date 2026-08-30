@@ -78,6 +78,10 @@ int main() {
         // 3.4) THRESHOLDING
         cv::Mat grad_thresholded; //the image after gradient and threshold computation
         cv::threshold(grad_mag, grad_thresholded, gradient_thresh, 255, cv::THRESH_BINARY); //computing a binary mask
+        /* Eventually the threshold can be replaced by Otsu's with this code:
+        cv::Mat grad_thresholded; //the image after gradient and threshold computation
+        cv::threshold(grad_mag, grad_thresholded, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU); //computing a binary mask through Otsu's optimal thresholding
+        */
 
         // 3.5) HOUGH TRANSFORM
         vector<cv::Vec4i> lines; //a vector containing all found lines
