@@ -1,10 +1,10 @@
-#include "SegmentationTechniques.h"
-
 /**
  * @file SegmentationTechniques.cpp
  * @brief Implementation of the SegmentationTechniques class.
  * @author Ivan Arduini
  */
+
+#include "SegmentationTechniques.h"
 
 cv::Mat SegmentationTechniques::otsu(const cv::Mat& frame) {
     cv::Mat binaryImage;

@@ -11,6 +11,8 @@ include_directories(include)
 add_library(UltraVisionCore STATIC
     src/FilterTechniques.cpp
     src/SegmentationTechniques.cpp
+    src/utils/Utils.cpp
+    src/TestingFunctions.cpp
 )
 
 target_link_libraries(UltraVisionCore PRIVATE ${OpenCV_LIBS})

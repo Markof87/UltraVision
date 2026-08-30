@@ -1,104 +1,76 @@
 #include <opencv2/highgui.hpp>
 #include <iostream>
 #include <filesystem>
-#include <map>
+
+#include "utils/Utils.h"
+#include "TestingFunctions.h"
 
 using namespace cv;
 
 int main(int argc, char **argv)
 {
     const std::string BASE_PATH = "../data/Sequences";
-
-    std::string path;
-    std::string windowName; 
+    const std::string WINDOW_NAME = "UltraVision Sequence Viewer";
+    const std::string actions[] = {"boxing", "handclapping", "handwaving", "jogging", "running", "walking"};
 
     //Load all image files from the specified path and sort them in ascending order
-    std::map<std::string, std::vector<std::string>> imageMap;
+    std::vector<cv::Mat> imageMap;
 
-    if(argc == 4)
+    // Command line parser to handle input arguments
+    const std::string keys="{path |../data/Sequences | Path to the dataset folder}"
+                             "{action | | Action name (boxing, handclapping, handwaving, jogging, running, walking)}"
+                             "{person | -1 | Person ID (1, 2, 3)}"
+                             "{scenario | -1 | Scenario ID (1, 2, 3, 4)}";
+    cv::CommandLineParser parser(argc, argv, keys);
+
+    std::string action = parser.get<std::string>("action");
+    int personId = parser.get<int>("person");
+    int scenarioId = parser.get<int>("scenario");
+
+    // Check if the command line arguments are valid
+    if(!parser.check())
     {
-        path = BASE_PATH + "/" + argv[1] + "/person0" + argv[2] + "_" + argv[1] + "_" + argv[3] + "/data";
-        windowName = "Person 0" + std::string(argv[2]) + " " + std::string(argv[1]) + " scenario d" + std::string(argv[3]);
-        
-        for (const auto &entry : std::filesystem::directory_iterator(path))
-            imageMap[windowName].push_back(entry.path().string());
+        parser.printErrors();
+        return -1;
     }
 
-    if(argc == 3) 
+    // if the lowercase of action is not in the list of actions, print an error message and exit
+    if(!action.empty() && std::find(std::begin(actions), std::end(actions), action) == std::end(actions))
     {
-        path = BASE_PATH + "/" + argv[1] + "/person0" + argv[2] + "_" + argv[1];
-
-        for (int i = 1; i <= 4; i++) {
-            std::string subfolderPath = path + "_d" + std::to_string(i) + "/data";
-            windowName = "Person 0" + std::string(argv[2]) + " " + std::string(argv[1]) + " scenario d" + std::to_string(i);
-            for (const auto &entry : std::filesystem::directory_iterator(subfolderPath))
-                imageMap[windowName].push_back(entry.path().string());
-        }
+        std::cerr << "Invalid action name: " << action << std::endl;
+        return -1;
     }
 
-    if(argc == 2) 
+    // if personId is not 1, 2, or 3, print an error message and exit
+    if(personId != 0 && (personId < 1 || personId > 3))
     {
-        path = BASE_PATH + "/" + argv[1];
-        for (int i = 1; i <=3; i++)
-        {
-            for (int j = 1; j <= 4; j++) 
-            {
-                std::string subfolderPath = path + "/person0" + std::to_string(i) + "_" + argv[1] + "_d" + std::to_string(j) + "/data";
-                windowName = "Person 0" + std::to_string(i) + " " + std::string(argv[1]) + " scenario d" + std::to_string(j);
-                for (const auto &entry : std::filesystem::directory_iterator(subfolderPath))
-                    imageMap[windowName].push_back(entry.path().string());
-            }
-        }
+        std::cerr << "Invalid person ID: " << personId << std::endl;
+        return -1;
     }
 
-    if(argc == 1) 
+    // if scenarioId is not 1, 2, 3, or 4, print an error message and exit
+    if(scenarioId != 0 && (scenarioId < 1 || scenarioId > 4))
     {
-        path = BASE_PATH;
-        std::string actions[] = {"boxing", "handclapping", "handwaving", "jogging", "running", "walking"};
-        for (const auto &action : actions) 
-        {
-            for (int i = 1; i <= 3; i++) 
-            {
-                for (int j = 1; j <= 4; j++) 
-                {
-                    std::string subfolderPath = path + "/" + action + "/person0" + std::to_string(i) + "_" + action + "_d" + std::to_string(j) + "/data";
-                    windowName = "Person 0" + std::to_string(i) + " " + action + " scenario d" + std::to_string(j);
+        std::cerr << "Invalid scenario ID: " << scenarioId << std::endl;
+        return -1;
+    }
 
-                    for (const auto &entry : std::filesystem::directory_iterator(subfolderPath))
-                        imageMap[windowName].push_back(entry.path().string());
-                }
-            }
-        }
+    // Load the dataset based on the provided parameters
+    imageMap = Utils::loadDataset(BASE_PATH, action, personId, scenarioId);
+    
+    std::vector<cv::Mat> otsuResults;
+    // Test the otsu four regions function
+    for(const auto& img : imageMap)
+    { 
+        //Clone original image with grayscale
+        cv::Mat greyImg;
+        cv::cvtColor(img, greyImg, cv::COLOR_BGR2GRAY);
+
+        //cv::Mat greyImg = img.clone(cv::IMREAD_GRAYSCALE);
+        otsuResults.push_back(TestingFunctions::test_otsu_four_regions(greyImg));
     }
     
-    //Loop all the images and display them in a window like a sequence
-    for (const auto &pair : imageMap)
-    {
-        const std::string &windowName = pair.first;
-        const std::vector<std::string> &files = pair.second;
-
-        for (const auto &imageFile : files)
-        {
-            Mat img = imread(imageFile);
-
-            // Check if the image exists and can be opened
-            if (img.empty())
-            {
-                std::cerr << "Could not open or find the image: " << imageFile << std::endl;
-                continue; // Skip to the next image
-            }
-
-            // Open window and show the image
-            namedWindow(windowName);
-            imshow(windowName, img);
-
-            // Wait for 40ms (25 FPS) before showing the next image
-            waitKey(40);
-            
-        }
-    }
-
-    char k = waitKey(0);
+    Utils::showDataset(otsuResults, WINDOW_NAME);
 
     return 0;
 }

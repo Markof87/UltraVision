@@ -6,12 +6,12 @@
  * Defines the polymorph structure of segmentation modules.
  */
 
- #ifndef SILHOUETTE_EXTRACTOR_INTERFACE_H
- #define SILHOUETTE_EXTRACTOR_INTERFACE_H
+#ifndef SILHOUETTE_EXTRACTOR_INTERFACE_H
+#define SILHOUETTE_EXTRACTOR_INTERFACE_H
 
- #include <opencv2/opencv.hpp>
+#include <opencv2/opencv.hpp>
 
- /**
+/**
   * @class SilhouetteExtractorInterface
   * @brief Abstract base class for silhouette extraction techniques (interface).
   */

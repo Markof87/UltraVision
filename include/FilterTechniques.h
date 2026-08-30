@@ -5,10 +5,10 @@
  * 
  */
 
-#include <opencv2/opencv.hpp>
+#ifndef FILTER_TECHNIQUES_H
+#define FILTER_TECHNIQUES_H
 
- #ifndef FILTER_TECHNIQUES_H
- #define FILTER_TECHNIQUES_H
+#include <opencv2/opencv.hpp>
 
 /**
  * @class FilterTechniques
@@ -19,7 +19,7 @@
 
  class FilterTechniques
  {
-     public:
+    public:
         /**
          * @brief Static function to perform Sobel filtering on the input frame.
          * @param frame The input frame from which to work on.
@@ -33,6 +33,12 @@
          * @return A filtered image representing the output after applying bilateral filtering.
          */
         static cv::Mat bilateral_filter(const cv::Mat& frame);
+        
+    private:
+        /**
+         * @brief Private constructor to prevent instantiation of the FilterTechniques class.
+         */
+        FilterTechniques() = default;
  };
 
  #endif // FILTER_TECHNIQUES_H
