@@ -78,6 +78,7 @@ int main(int argc, char **argv)
                     cv::waitKey(40); // Wait for 40ms (25 FPS)
                 }
             }
+
             int delay = (play_state == 1) ? 40 : 100; // 40ms for playing, 100ms for paused
             char key = static_cast<char>(cv::waitKey(delay));
 
@@ -85,15 +86,47 @@ int main(int argc, char **argv)
                 break;
             else if(key == 'p') // 'p' to toggle play/pause
                 play_state = 1 - play_state; // Toggle between 0 and 1
-            else if(key == 'n') // 'n' for next frame
+            else if(key == 'm') // 'm' for next frame
             {
                 if(play_state == 0 && !loadedSequence.empty())
                     frame_idx = (frame_idx + 1) % loadedSequence.size();
             }
-            else if(key == 'b') // 'b' for previous frame
+            else if(key == 'n') // 'n' for previous frame
             {
                 if(play_state == 0 && !loadedSequence.empty())
                     frame_idx = (frame_idx - 1 + loadedSequence.size()) % loadedSequence.size();
+            }
+            else if(key == '1') // '1' to use bilateral filter
+            {
+                if(!loadedSequence.empty())
+                {
+                    std::vector<cv::Mat> filteredSequence;
+                    for(const auto& frame : loadedSequence)
+                    {
+                        cv::Mat filteredFrame;
+                        cv::bilateralFilter(frame, filteredFrame, 9, 75, 75);
+                        filteredSequence.push_back(filteredFrame);
+                    }
+                    loadedSequence = filteredSequence;
+                }
+            }
+            else if(key == '2') // '2' to use Otsu four regions filter
+            {
+                if(!loadedSequence.empty())
+                {
+                    std::vector<cv::Mat> otsuSequence;
+                    for(const auto& frame : loadedSequence)
+                    { 
+                        //Clone original image with grayscale
+                        cv::Mat greyImg, otsuImg, otsuBgr;
+                        cv::cvtColor(frame, greyImg, cv::COLOR_BGR2GRAY);
+
+                        otsuImg = TestingFunctions::test_otsu_four_regions(greyImg);
+                        cv::cvtColor(otsuImg, otsuBgr, cv::COLOR_GRAY2BGR); 
+                        otsuSequence.push_back(otsuBgr);
+                    }
+                    loadedSequence = otsuSequence;
+                }
             }
         }
     }
