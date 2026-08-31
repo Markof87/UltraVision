@@ -85,16 +85,16 @@ int main() {
 
         // 3.5) HOUGH TRANSFORM
         vector<cv::Vec4i> lines; //a vector containing all found lines
-        int threshold_hough = 10;  //minimum number of lined up points to find a line through them
-        double minLineLength = 5;  //minimum length of a valid line
-        double maxLineGap = 15;    //maximum gap between two lines to be unified in a unique line
+        int threshold_hough = 20;  //minimum number of lined up points to find a line through them
+        double minLineLength = 15;  //minimum length of a valid line
+        double maxLineGap = 5;    //maximum gap between two lines to be unified in a unique line
         
         cv::HoughLinesP(grad_thresholded, lines, 1, CV_PI / 180, threshold_hough, minLineLength, maxLineGap); //Hough function
         /*parameters meaning: the image after gradient and threshold, vector storing lines, "rho", "theta", 3 parameters just defined*/  
 
         for (int l = 0; l < lines.size(); l++) { //layering found lines (in green) on the gradient and threshold image
             cv::Vec4i ln = lines[l];
-            cv::line(grad_thresholded, cv::Point(ln[0], ln[1]), cv::Point(ln[2], ln[3]), cv::Scalar(255), 1, cv::LINE_AA);
+            cv::line(grad_thresholded, cv::Point(ln[0], ln[1]), cv::Point(ln[2], ln[3]), cv::Scalar(255), 1, cv::LINE_8);
         }
 
         // 3.6) FLOOR LINE AND OTHER NOISY ELEMENTS REMOVING

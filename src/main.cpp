@@ -4,17 +4,16 @@
 
 #include "utils/Utils.h"
 #include "TestingFunctions.h"
+#include "TrackingPerson.h"
 
 using namespace cv;
 
 int main(int argc, char **argv)
 {
+    TrackingPerson tracker = TrackingPerson();
+
     const std::string BASE_PATH = "../data/Sequences";
     const std::string WINDOW_NAME = "UltraVision Sequence Viewer";
-    const std::string actions[] = {"boxing", "handclapping", "handwaving", "jogging", "running", "walking"};
-
-    //Load all image files from the specified path and sort them in ascending order
-    std::vector<cv::Mat> imageMap;
 
     // Command line parser to handle input arguments
     const std::string keys="{path |../data/Sequences | Path to the dataset folder}"
@@ -23,54 +22,32 @@ int main(int argc, char **argv)
                              "{scenario | -1 | Scenario ID (1, 2, 3, 4)}";
     cv::CommandLineParser parser(argc, argv, keys);
 
-    std::string action = parser.get<std::string>("action");
-    int personId = parser.get<int>("person");
-    int scenarioId = parser.get<int>("scenario");
+    std::string action;
+    int personId;
+    int scenarioId;
 
-    // Check if the command line arguments are valid
-    if(!parser.check())
-    {
-        parser.printErrors();
-        return -1;
-    }
-
-    // if the lowercase of action is not in the list of actions, print an error message and exit
-    if(!action.empty() && std::find(std::begin(actions), std::end(actions), action) == std::end(actions))
-    {
-        std::cerr << "Invalid action name: " << action << std::endl;
-        return -1;
-    }
-
-    // if personId is not 1, 2, or 3, print an error message and exit
-    if(personId != 0 && (personId < 1 || personId > 3))
-    {
-        std::cerr << "Invalid person ID: " << personId << std::endl;
-        return -1;
-    }
-
-    // if scenarioId is not 1, 2, 3, or 4, print an error message and exit
-    if(scenarioId != 0 && (scenarioId < 1 || scenarioId > 4))
-    {
-        std::cerr << "Invalid scenario ID: " << scenarioId << std::endl;
-        return -1;
-    }
+    // Load command line argument parameters
+    Utils::loadArgumentParameters(parser, action, personId, scenarioId);
 
     // Load the dataset based on the provided parameters
-    imageMap = Utils::loadDataset(BASE_PATH, action, personId, scenarioId);
+    std::vector<cv::Mat> imageMap = Utils::loadDataset(BASE_PATH, action, personId, scenarioId);
     
     std::vector<cv::Mat> otsuResults;
+    std::vector<cv::Rect> boundingBoxes;
     // Test the otsu four regions function
     for(const auto& img : imageMap)
     { 
         //Clone original image with grayscale
-        cv::Mat greyImg;
+        cv::Mat greyImg, otsuImg;
         cv::cvtColor(img, greyImg, cv::COLOR_BGR2GRAY);
 
-        //cv::Mat greyImg = img.clone(cv::IMREAD_GRAYSCALE);
-        otsuResults.push_back(TestingFunctions::test_otsu_four_regions(greyImg));
+        otsuImg = TestingFunctions::test_otsu_four_regions(greyImg);
+        otsuResults.push_back(otsuImg);
+
+        boundingBoxes.push_back(tracker.getActorBoundingBox(otsuImg));
     }
     
-    Utils::showDataset(otsuResults, WINDOW_NAME);
+    Utils::showDataset(otsuResults, boundingBoxes, WINDOW_NAME);
 
     return 0;
 }

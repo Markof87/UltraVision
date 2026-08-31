@@ -24,6 +24,9 @@ add_library(UltraVisionCore STATIC
     segm_files/stretching_then_sobel_then_otsu.cpp
     segm_files/otsu_2reg_dynamic.cpp
     segm_files/watershed.cpp
+
+    
+    src/TrackingPerson.cpp
 )
 
 target_link_libraries(UltraVisionCore PRIVATE ${OpenCV_LIBS})
