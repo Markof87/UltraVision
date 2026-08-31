@@ -8,3 +8,5 @@ void test_otsu_4regions();
 void test_otsu_2regions();
 void test_otsu_2reg_dynamic();
 void test_watershed();
+void test2_watershed();
+void test3_watershed();

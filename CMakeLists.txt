@@ -24,6 +24,8 @@ add_library(UltraVisionCore STATIC
     segm_files/stretching_then_sobel_then_otsu.cpp
     segm_files/otsu_2reg_dynamic.cpp
     segm_files/watershed.cpp
+    segm_files/prova_watershed.cpp
+    segm_files/prova2_watershed.cpp
 
     
     src/TrackingPerson.cpp
@@ -32,7 +34,8 @@ add_library(UltraVisionCore STATIC
 target_link_libraries(UltraVisionCore PRIVATE ${OpenCV_LIBS})
 
 add_executable(UltraVision #main_segmentation.cpp
-                            src/main.cpp)
+                            src/main.cpp
+                            )
 target_link_libraries(UltraVision PRIVATE UltraVisionCore ${OpenCV_LIBS})
 
 #Comment this line if you want to build in command mode

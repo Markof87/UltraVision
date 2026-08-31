@@ -19,9 +19,10 @@ int main() {
         std::cout << "5. Otsu Grid 2x2 with Morphological Cleaning\n";
         std::cout << "6. Otsu Top/Bottom (2 Horizontal Regions)\n";
         std::cout << "7. Watershed\n";
+        std::cout << "8. Watershed 2nd version\n";
         std::cout << "0. Exit\n";
         std::cout << "---------------------------------------------------------\n";
-        std::cout << "Select a test to run (0-7): ";
+        std::cout << "Select a test to run (0-8): ";
         
         std::cin >> choice;
 
@@ -66,6 +67,10 @@ int main() {
             case 7:
                 std::cout << "--> Starting Watershed...\n";
                 test_watershed();
+                break;
+            case 8:
+                std::cout << "--> Starting Watershed...\n";
+                test3_watershed();
                 break;
             case 0:
                 std::cout << "Exiting.\n";
