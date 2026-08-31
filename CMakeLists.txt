@@ -31,7 +31,8 @@ add_library(UltraVisionCore STATIC
 
 target_link_libraries(UltraVisionCore PRIVATE ${OpenCV_LIBS})
 
-add_executable(UltraVision main_segmentation.cpp)
+add_executable(UltraVision #main_segmentation.cpp
+                            src/main.cpp)
 target_link_libraries(UltraVision PRIVATE UltraVisionCore ${OpenCV_LIBS})
 
 #Comment this line if you want to build in command mode
