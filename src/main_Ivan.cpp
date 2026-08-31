@@ -3,7 +3,7 @@
 #include <filesystem> // La libreria utile per le cartelle
 #include <opencv2/opencv.hpp>
 
-#include "utils.hpp" // Il file ausiliario
+#include "SegmentationTechniques.h"
 
 namespace fs = std::filesystem;
 

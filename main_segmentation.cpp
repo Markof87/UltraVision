@@ -17,9 +17,11 @@ int main() {
         std::cout << "3. Edge Detection (Sobel + Otsu)\n";
         std::cout << "4. Contrast stretching test (Stretching + Sobel + Otsu)\n";
         std::cout << "5. Otsu Grid 2x2 with Morphological Cleaning\n";
+        std::cout << "6. Otsu Top/Bottom (2 Horizontal Regions)\n";
+        std::cout << "7. Watershed\n";
         std::cout << "0. Exit\n";
         std::cout << "---------------------------------------------------------\n";
-        std::cout << "Select a test to run (0-5): ";
+        std::cout << "Select a test to run (0-7): ";
         
         std::cin >> choice;
 
@@ -57,8 +59,16 @@ int main() {
                 std::cout << "--> Starting Otsu Grid 2x2...\n";
                 test_otsu_4regions();
                 break;
+            case 6:
+                std::cout << "--> Starting Otsu Top/Bottom...\n";
+                test_otsu_2reg_dynamic();
+                break;
+            case 7:
+                std::cout << "--> Starting Watershed...\n";
+                test_watershed();
+                break;
             case 0:
-                std::cout << "Exiting. Bye!\n";
+                std::cout << "Exiting.\n";
                 break;
             default:
                 std::cout << "[ERROR] Wrong number, try again.\n";

@@ -13,11 +13,22 @@ add_library(UltraVisionCore STATIC
     src/SegmentationTechniques.cpp
     src/utils/Utils.cpp
     src/TestingFunctions.cpp
+
+    # questi sotto servono per avviare main_segmentation
+    tecniche_segmentazione.h
+    segm_files/otsu_watershed_meanshift.cpp
+    segm_files/otsu_then_watershed.cpp
+    segm_files/otsu_4regions.cpp
+    segm_files/otsu_2regions.cpp
+    segm_files/sobel_then_otsu.cpp
+    segm_files/stretching_then_sobel_then_otsu.cpp
+    segm_files/otsu_2reg_dynamic.cpp
+    segm_files/watershed.cpp
 )
 
 target_link_libraries(UltraVisionCore PRIVATE ${OpenCV_LIBS})
 
-add_executable(UltraVision src/main.cpp)
+add_executable(UltraVision main_segmentation.cpp)
 target_link_libraries(UltraVision PRIVATE UltraVisionCore ${OpenCV_LIBS})
 
 #Comment this line if you want to build in command mode
