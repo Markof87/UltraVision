@@ -50,6 +50,6 @@ class SilhouetteExtractor : public SilhouetteExtractorInterface
          * @return A binary image representing the extracted silhouette after thresholding.
          */
         cv::Mat thresholding(const cv::Mat& frame);
-
+};
 
 #endif // SILHOUETTEEXTRACTOR_H

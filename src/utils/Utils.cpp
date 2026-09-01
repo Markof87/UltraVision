@@ -7,9 +7,33 @@
 #include <filesystem>
 
 #include "utils/Utils.h"
+#include "Sequencer.h"
 
 namespace Utils 
 {
+    Sequencer sequencer = Sequencer();
+
+    void loadSequenceFromCommandLineArguments(std::vector<cv::Mat>& loadedSequence, const std::string& BASE_PATH, const std::string& WINDOW_NAME, cv::CommandLineParser& parser)
+    {
+        std::string action;
+        int personId;
+        int scenarioId;
+
+        // Load command line argument parameters
+        loadArgumentParameters(parser, action, personId, scenarioId);
+
+        // Load the dataset based on the provided command line parameters
+        loadedSequence = loadDataset(BASE_PATH, action, personId, scenarioId);
+
+        if(loadedSequence.empty())
+        {
+            std::cerr << "No images found for the specified parameters." << std::endl;
+            return;
+        }
+
+        showDataset(loadedSequence, WINDOW_NAME);
+    }
+
     void loadArgumentParameters(cv::CommandLineParser& parser, std::string& action, int& personId, int& scenarioId)
     {
         const std::string actions[] = {"boxing", "handclapping", "handwaving", "jogging", "running", "walking"};
@@ -81,15 +105,12 @@ namespace Utils
         return dataset;
     }
 
-    void showDataset(const std::vector<cv::Mat>& dataset, const std::vector<cv::Rect>& boundingBoxes, const std::string& windowName) 
+    void showDataset(const std::vector<cv::Mat>& dataset, const std::string& windowName) 
     {
         for (size_t i = 0; i < dataset.size(); ++i) 
         {
             cv::Mat imgResize;
             cv::resize(dataset[i], imgResize, cv::Size(600, 600), 0, 0, cv::INTER_NEAREST); 
-
-            // Draw the bounding box on the image
-            cv::rectangle(imgResize, boundingBoxes[i], cv::Scalar(0, 0, 255), 2);
 
             cv::imshow(windowName, imgResize);
             

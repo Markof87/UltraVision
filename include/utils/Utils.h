@@ -20,6 +20,15 @@
 namespace Utils
 {
     /**
+     * @brief Loads a sequence of images from command line arguments.
+     * @param loadedSequence A reference to a vector where the loaded images will be stored.
+     * @param BASE_PATH The base path to the dataset.
+     * @param WINDOW_NAME The name of the window in which to display the images.
+     * @param parser The CommandLineParser object used to parse command line arguments.
+     */
+    void loadSequenceFromCommandLineArguments(std::vector<cv::Mat>& loadedSequence, const std::string& BASE_PATH, const std::string& WINDOW_NAME, cv::CommandLineParser& parser);
+
+    /**
      * @brief Loads command line argument parameters into the provided variables.
      * @param parser The CommandLineParser object used to parse command line arguments.
      * @param action A reference to a string where the action name will be stored.
@@ -41,10 +50,9 @@ namespace Utils
     /**
      * @brief Displays a dataset of images in a window.
      * @param dataset A vector of cv::Mat objects representing the images to be displayed.
-     * @param boundingBoxes A vector of cv::Rect objects representing the bounding boxes to be drawn on the images.
      * @param windowName The name of the window in which to display the images.
      */
-    void showDataset(const std::vector<cv::Mat>& dataset, const std::vector<cv::Rect>& boundingBoxes, const std::string& windowName);
+    void showDataset(const std::vector<cv::Mat>& dataset, const std::string& windowName);
 
     /**
      * @brief Adds a resource (image) to the dataset.
@@ -55,6 +63,14 @@ namespace Utils
      * @param scenarioId The ID of the scenario (e.g., 1, 2, 3, 4).
      */
     void addResource(std::vector<cv::Mat>& dataset, const std::string& basePath, const std::string& action, int personId, int scenarioId);
+
+    /**
+     * @brief Displays the graphical user interface (GUI) for selecting actions, persons, and scenarios.
+     * @param loadedSequence A reference to the vector where the loaded images will be stored.
+     * @param BASE_PATH The base path to the dataset.
+     * @param WINDOW_NAME The name of the window in which to display the GUI.
+     */
+    void graphicalUserInterface(std::vector<cv::Mat>& loadedSequence, const std::string& BASE_PATH, const std::string& WINDOW_NAME);
 }
 
 #endif // UTILS_H

@@ -12,6 +12,8 @@ add_library(UltraVisionCore STATIC
     src/FilterTechniques.cpp
     src/SegmentationTechniques.cpp
     src/utils/Utils.cpp
+    src/Sequencer.cpp
+    src/ManipulatingService.cpp
     src/TestingFunctions.cpp
 
     # questi sotto servono per avviare main_segmentation
