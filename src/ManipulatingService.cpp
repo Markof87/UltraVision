@@ -5,9 +5,11 @@
  */
 
 #include "ManipulatingService.h"
+#include "SegmentationAlg.h"
 
 void ManipulatingService::manipulateFrame(const cv::Mat& inputFrame, cv::Mat& outputMask)
 {
     if (inputFrame.empty()) return;
-    outputMask = inputFrame.clone(); // For now, just clone the input frame to the output mask
+    SegmentationAlg::Segmentation(inputFrame, outputMask);
+    // outputMask = inputFrame.clone(); // For now, just clone the input frame to the output mask
 }

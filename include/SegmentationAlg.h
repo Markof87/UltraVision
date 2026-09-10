@@ -10,7 +10,16 @@
 
 #include <opencv2/opencv.hpp>
 
+class SegmentationAlg
+{
+public:
+    /**
+     * @brief Segmentation function
+     * @details This function performs segmentation on the input image and produces an output image.
+     * @param input The input image to be segmented.
+     * @param output The output image after segmentation.
+     */
+    static void Segmentation(const cv::Mat& input, cv::Mat& output);
+};
 
-void segmentation(const cv::Mat& input, const cv::Mat& output);
-
-#endif
+#endif // SEGMENTATION_ALG

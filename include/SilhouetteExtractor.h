@@ -22,12 +22,12 @@ class SilhouetteExtractor : public SilhouetteExtractorInterface
         /**
          * @brief Constructor for the SilhouetteExtractor class.
          */
-        SilhouetteExtractor() {};
+        SilhouetteExtractor();
 
         /**
          * @brief Destructor for the SilhouetteExtractor class.
          */
-        virtual ~SilhouetteExtractor() {};
+        virtual ~SilhouetteExtractor();
 
         /**
          * @brief Implementation of the extractSilhouette function.

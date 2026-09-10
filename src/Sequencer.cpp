@@ -85,7 +85,22 @@ void Sequencer::drawHUD(cv::Mat& canvas, const cv::Mat& currentFrame, size_t tot
     canvas = cv::Mat::zeros(600, 800, CV_8UC3);
     cv::Mat frameResized;
     cv::resize(currentFrame, frameResized, cv::Size(800, 600));
-    frameResized.copyTo(canvas(cv::Rect(0, 0, frameResized.cols, frameResized.rows)));
+
+    cv::Mat frameForDisplay;
+    if (frameResized.channels() == 1)
+    {
+        cv::cvtColor(frameResized, frameForDisplay, cv::COLOR_GRAY2BGR);
+    }
+    else if (frameResized.channels() == 4)
+    {
+        cv::cvtColor(frameResized, frameForDisplay, cv::COLOR_BGRA2BGR);
+    }
+    else
+    {
+        frameForDisplay = frameResized;
+    }
+
+    frameForDisplay.copyTo(canvas(cv::Rect(0, 0, frameForDisplay.cols, frameForDisplay.rows)));
 
     std::string statusText = "STATUS: " + std::string(play_state == 1 ? "PLAYING" : "PAUSED");
     cv::putText(canvas, statusText, cv::Point(10, 20), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 1);
