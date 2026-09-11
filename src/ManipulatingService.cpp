@@ -11,5 +11,6 @@ void ManipulatingService::manipulateFrame(const cv::Mat& inputFrame, cv::Mat& ou
 {
     if (inputFrame.empty()) return;
     SegmentationAlg::Segmentation(inputFrame, outputMask);
+    BboxAlg::bbox_func(outputMask, bboxFrame)
     // outputMask = inputFrame.clone(); // For now, just clone the input frame to the output mask
 }
