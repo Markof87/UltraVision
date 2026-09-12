@@ -26,7 +26,7 @@ void SegmentationAlg::Segmentation(const cv::Mat& input, cv::Mat& output)
 
     cv::Mat blurred;
 
-    /// takes as input the original frame and blurs it
+    // takes as input the original frame and blurs it
     cv::GaussianBlur(gray, blurred, cv::Size(3, 3), 0, 0, cv::BORDER_DEFAULT); 
 
     cv::Mat closed;
@@ -63,5 +63,5 @@ void SegmentationAlg::Segmentation(const cv::Mat& input, cv::Mat& output)
     // performs an additional smoothing to obtain a more defined silhouette
     cv::morphologyEx(almost_segmented, segmented, cv::MORPH_CLOSE, smoothing_se);
 
-    output = segmented;
+    segmented.copyTo(output);   //guarantees 1-channel (grayscale) output image 
 }

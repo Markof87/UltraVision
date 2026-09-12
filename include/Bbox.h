@@ -5,8 +5,8 @@
 */
 
 
-#ifndef BBOX
-#define BBOX
+#ifndef B_BOX
+#define B_BOX
 
 #include <opencv2/opencv.hpp>
 
@@ -22,4 +22,4 @@ public:
     static void bbox_func(const cv::Mat& input, cv::Mat& output);
 };
 
-#endif // BBOX
+#endif // B_BOX
