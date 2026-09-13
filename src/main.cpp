@@ -4,8 +4,6 @@
 
 #include "utils/Utils.h"
 #include "Sequencer.h"
-#include "TestingFunctions.h"
-#include "TrackingPerson.h"
 
 const std::string BASE_PATH = "../data/Sequences";
 const std::string WINDOW_NAME = "UltraVision Sequence Viewer";
