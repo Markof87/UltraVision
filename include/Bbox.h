@@ -19,7 +19,7 @@ public:
      * @param input The input segmented image.
      * @param output The output image (the original frame) containing the bounding box.
      */
-    static void bbox_func(const cv::Mat& input, cv::Mat& output);
+    static cv::Rect bbox_func(const cv::Mat& input, cv::Mat& output);
 };
 
 #endif // B_BOX

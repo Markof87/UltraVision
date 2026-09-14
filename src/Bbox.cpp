@@ -9,7 +9,7 @@
 
 #include "Bbox.h"
 
-void Bbox::bbox_func(const cv::Mat& input, cv::Mat& output){ 
+cv::Rect Bbox::bbox_func(const cv::Mat& input, cv::Mat& output){ 
     
     cv::Mat labels, stats, centroids;
 
@@ -34,9 +34,20 @@ void Bbox::bbox_func(const cv::Mat& input, cv::Mat& output){
 
     for (int j = 1; j < num_labels; j++) {              //looking for greatest connected component area (j=0 corresponds to no area)
         int area = stats.at<int>(j, cv::CC_STAT_AREA);  //area = value stored in the field having coordinates (j, column "area")
-        if (area > min_area && area > max_area) {       //if current area > 20 pixel and greater than the greatest area found so far, update max_area with the current value
-            max_area = area;
-            largest_label = j;                          //store also its reference
+        int w = stats.at<int>(j, cv::CC_STAT_WIDTH);    //width w = value stored in the field having coordinates (j, cloumn "width")
+        int h = stats.at<int>(j, cv::CC_STAT_HEIGHT);   //height h = value stored in the field having coordinates (j, column "height")
+
+        //computes the bounding box area and "compares" it to the area of the candidate actor, in order to exclude shadows having an "aspect ratio" similar to a human aspect ratio (h>w)
+        double bbox_area = static_cast<double>(w*h);                    //double conversion is necessary to avoid "zero results"
+        double areas_ratio = static_cast<double>(area) / bbox_area;
+
+        if(areas_ratio >= 0.30) {                           //assume that the "human blob" has an area at least equal to 70% of the bounding box area. It can be modified to tune results
+                                                            //(like an ellipse area in a rectangle one - approximately a 75% - rounded down)
+
+            if (area > min_area && area > max_area) {       //if current area > 20 pixel and greater than the greatest area found so far, update max_area with the current value
+                max_area = area;
+                largest_label = j;                          //store also its reference
+            }
         }
     }
 
@@ -49,7 +60,7 @@ void Bbox::bbox_func(const cv::Mat& input, cv::Mat& output){
 
         finalSilhouette = cv::Mat::zeros(input.size(), CV_8UC1);            //initialize black image
 
-        for (int r = 0; r < input.rows; r++) {                          //scan segmented image
+        for (int r = 0; r < input.rows; r++) {                              //scan segmented image
            for (int c = 0; c < input.cols; c++) {                      
                if (labels.at<int>(r, c) == largest_label) {                 //if labels pixel is a pixel of the actor
                     finalSilhouette.at<uchar>(r, c) = 255;                  //fill it in white colour, else it is black
@@ -59,7 +70,7 @@ void Bbox::bbox_func(const cv::Mat& input, cv::Mat& output){
 
         bool aspect_ratio = (h >= 20 && h > w);                             //setting human aspect ratio parameters (height greater than 20 pixel and height greater than width; they may be modified for tuning the result)
 
-        if (aspect_ratio) {                                                 // if aspect ratio is respected
+        if (aspect_ratio) {                                                 //if aspect ratio is respected
             actor_found = true;                                             //an actor was found
         } 
         else {
@@ -68,7 +79,9 @@ void Bbox::bbox_func(const cv::Mat& input, cv::Mat& output){
     }
 
    if (actor_found) {
-        cv::rectangle(output, actor_bbox, cv::Scalar(0, 0, 255), 1);        //draw a red bounding box on 'output' (the original frame) around the actor
+        cv::rectangle(output, actor_bbox, cv::Scalar(0, 0, 255), 2);        //draw a red bounding box on 'output' (the original frame) around the actor
+        return actor_bbox;                                                  //this bounding box is useful for next phases (classification)
     }
+    return cv::Rect(0, 0, 0, 0);                                            //if no actor is found return no bounding box
 
 }
