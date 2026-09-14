@@ -1,5 +1,5 @@
 /**
- * @file Sequencer.h
+ * @file sequencer.h
  * @brief Header file for the Sequencer class, which handles the sequencing of images.
  * @author Marco Fabiani
  */

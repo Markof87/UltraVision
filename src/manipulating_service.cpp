@@ -1,12 +1,12 @@
 /**
- * @file ManipulatingService.cpp
+ * @file manipulating_service.cpp
  * @brief Implementation of the ManipulatingService class.
  * @author Marco Fabiani
  */
 
-#include "ManipulatingService.h"
-#include "SegmentationAlg.h"
-#include "Bbox.h"
+#include "manipulating_service.h"
+#include "segmentation_alg.h"
+#include "bbox.h"
 
 void ManipulatingService::manipulateFrame(const cv::Mat& inputFrame, cv::Mat& outputMask)
 {

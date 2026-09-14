@@ -1,5 +1,5 @@
 /**
- * @file Utils.h
+ * @file utils.h
  * @brief Header file for the Utils namespace, which contains utility functions.
  * @author Marco Fabiani
  * 

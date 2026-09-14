@@ -5,7 +5,7 @@
 */
 
 
-#include "SegmentationAlg.h"
+#include "segmentation_alg.h"
 
 // Segmentation function
 void SegmentationAlg::Segmentation(const cv::Mat& input, cv::Mat& output)

@@ -6,8 +6,8 @@
 
 #include <filesystem>
 
-#include "utils/Utils.h"
-#include "Sequencer.h"
+#include "utils/utils.h"
+#include "sequencer.h"
 
 namespace Utils 
 {

@@ -1,12 +1,12 @@
 /**
- * @file Sequencer.cpp
+ * @file sequencer.cpp
  * @brief Implementation of the Sequencer class, which handles the sequencing of images.
  * @author Marco Fabiani
  */
 
-#include "Sequencer.h"
-#include "ManipulatingService.h"
-#include "utils/Utils.h"
+#include "sequencer.h"
+#include "manipulating_service.h"
+#include "utils/utils.h"
 
 void Sequencer::run(const std::string& basePath, const std::string& windowName)
 {
