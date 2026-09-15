@@ -2,8 +2,8 @@
 #include <iostream>
 #include <filesystem>
 
-#include "utils/Utils.h"
-#include "Sequencer.h"
+#include "utils/utils.h"
+#include "sequencer.h"
 
 const std::string BASE_PATH = "../data/Sequences";
 const std::string WINDOW_NAME = "UltraVision Sequence Viewer";
