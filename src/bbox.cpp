@@ -7,7 +7,7 @@
 */
 
 
-#include "bbox.h"
+#include "Bbox.h"
 
 cv::Rect Bbox::bbox_func(const cv::Mat& input, cv::Mat& output){ 
     
@@ -28,22 +28,22 @@ cv::Rect Bbox::bbox_func(const cv::Mat& input, cv::Mat& output){
 
     bool actor_found = false;     
 
-    int largest_label = -1; //the number identifying the gretest connected component so far 
+    int largest_label = -1; //the number identifying the greatest connected component so far 
     int max_area = 0;       //maximum area of the greatest connected component so far
-    int min_area = 20;      //minimum area a connected component should have (ignore connected components having smaller area than 20)
+    int min_area = 30;      //minimum area a connected component should have (ignore connected components having smaller area than 20)
 
     for (int j = 1; j < num_labels; j++) {              //looking for greatest connected component area (j=0 corresponds to no area)
         int area = stats.at<int>(j, cv::CC_STAT_AREA);  //area = value stored in the field having coordinates (j, column "area")
         int w = stats.at<int>(j, cv::CC_STAT_WIDTH);    //width w = value stored in the field having coordinates (j, cloumn "width")
         int h = stats.at<int>(j, cv::CC_STAT_HEIGHT);   //height h = value stored in the field having coordinates (j, column "height")
 
-        //computes the bounding box area and "compares" it to the area of the candidate actor, in order to exclude shadows having an "aspect ratio" similar to a human aspect ratio (h>w)
+        /*
+        computes the bounding box area and "compares" it to the area of the candidate actor, in order to exclude shadows having an "aspect ratio" similar to a human aspect ratio (h>w)
+        */
         double bbox_area = static_cast<double>(w*h);                    //double conversion is necessary to avoid "zero results"
-        double areas_ratio = static_cast<double>(area) / bbox_area;
+        double areas_ratio = static_cast<double>(area) / bbox_area;     //the ratio between the blob area (candidate actor) and the area of the virtual bounding box surrounding it
 
-        if(areas_ratio >= 0.30) {                           //assume that the "human blob" has an area at least equal to 70% of the bounding box area. It can be modified to tune results
-                                                            //(like an ellipse area in a rectangle one - approximately a 75% - rounded down)
-
+        if(areas_ratio >= 0.20) {                           
             if (area > min_area && area > max_area) {       //if current area > 20 pixel and greater than the greatest area found so far, update max_area with the current value
                 max_area = area;
                 largest_label = j;                          //store also its reference
@@ -68,9 +68,11 @@ cv::Rect Bbox::bbox_func(const cv::Mat& input, cv::Mat& output){
             }
         }
 
-        bool aspect_ratio = (h >= 20 && h > w);                             //setting human aspect ratio parameters (height greater than 20 pixel and height greater than width; they may be modified for tuning the result)
+        bool aspect_ratio = (h >= 20 && (h * 1.5) > w);                     //setting human aspect ratio parameters (height greater than 20 pixel and height greater than width; they may be modified for tuning)
+        int frame_area = input.rows * input.cols;
+        bool big_enough = (max_area > 250 && max_area < frame_area * 0.4);
 
-        if (aspect_ratio) {                                                 //if aspect ratio is respected
+        if (aspect_ratio && big_enough) {                                   //if aspect ratio is respected
             actor_found = true;                                             //an actor was found
         } 
         else {
