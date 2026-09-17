@@ -68,9 +68,9 @@ cv::Rect Bbox::bbox_func(const cv::Mat& input, cv::Mat& output){
             }
         }
 
-        bool aspect_ratio = (h >= 20 && (h * 1.5) > w);                     //setting human aspect ratio parameters (height greater than 20 pixel and height greater than width; they may be modified for tuning)
+        bool aspect_ratio = (h >= 12 && (h * 1.5) > w);                     //setting human aspect ratio parameters (height greater than 20 pixel and height greater than width; they may be modified for tuning)
         int frame_area = input.rows * input.cols;
-        bool big_enough = (max_area > 250 && max_area < frame_area * 0.4);
+        bool big_enough = (max_area > 100 && max_area < frame_area * 0.4);
 
         if (aspect_ratio && big_enough) {                                   //if aspect ratio is respected
             actor_found = true;                                             //an actor was found
