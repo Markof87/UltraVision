@@ -27,33 +27,29 @@ void Sequencer::run(const std::string& basePath, const std::string& windowName)
     std::vector<cv::Mat> loadedSequence;
     cv::Mat canvas;
 
-    while(true)
+    while(true) //MODIFIED
     {
-        updateLoader(loadedSequence, basePath);
+    updateLoader(loadedSequence, basePath);
 
-        if(!loadedSequence.empty())
+    if(!annotatedSequence.empty())
+    {
+        cv::Mat currentFrame = annotatedSequence[frame_idx];
+
+        drawHUD(canvas, currentFrame, annotatedSequence.size());
+        cv::imshow(windowName, canvas);
+
+        if(play_state == 1)
         {
-            cv::Mat currentRawFrame = loadedSequence[frame_idx];
-
-            cv::Mat segmentedMask;
-            ManipulatingService::manipulateFrame(currentRawFrame, segmentedMask);
-
-            drawHUD(canvas, segmentedMask, loadedSequence.size());
-            cv::imshow(windowName, canvas);
-
-            if(play_state == 1)
-            {
-                frame_idx = (frame_idx + 1) % loadedSequence.size();
-                cv::waitKey(40); // Wait for 40ms (25 FPS)
-            }
+            frame_idx = (frame_idx + 1) % annotatedSequence.size();
         }
-
-        int delay = (play_state == 1) ? 40 : 100; // 40ms for playing, 100ms for paused
-        char key = static_cast<char>(cv::waitKey(delay));
-
-        if(handleKeyboard(key, loadedSequence.size()))
-            break;
     }
+
+    int delay = (play_state == 1) ? 40 : 100; // 40ms (~25 FPS)
+    char key = static_cast<char>(cv::waitKey(delay));
+
+    if(handleKeyboard(key, annotatedSequence.size()))
+        break;
+}
 
     cv::destroyWindow(windowName);
 }
@@ -75,6 +71,14 @@ void Sequencer::updateLoader(std::vector<cv::Mat>& loadedSequence, const std::st
         // Load the dataset based on the selected parameters
         loadedSequence = Utils::loadDataset(basePath, selected_action, selected_person, selected_scenario);
         frame_idx = 0;
+
+
+        //ADDED
+        ManipulatingService manipulating_service;
+        currentPredictedAction = manipulating_service.manipulateSequence(loadedSequence, annotatedSequence);
+        std::cout << "Predicted Action: " << currentPredictedAction << std::endl;
+
+
         need_reload = false;
     }
 }

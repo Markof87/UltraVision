@@ -8,6 +8,8 @@
 #define SEQUENCER_H
 
 #include <opencv2/opencv.hpp>
+#include <vector> //ADDED
+#include <string> //ADDED
 
 /**
  * @class Sequencer
@@ -167,6 +169,11 @@ private:
     bool need_reload; ///< Flag indicating whether the sequence needs to be reloaded.
     int play_state; ///< State of the sequencer (0: paused, 1: playing).
     int frame_idx; ///< Index of the current frame in the sequence.
+
+
+    //ADDED
+    std::vector<cv::Mat> annotatedSequence; ///< Cache storing annotated frame clones with bounding box and red action label.
+    std::string currentPredictedAction;     ///< Label of the action predicted for the currently loaded sequence.
 
 };
 

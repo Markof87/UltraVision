@@ -1,5 +1,5 @@
-#ifndef BBOX_UTILS_H
-#define BBOX_UTILS_H
+#ifndef CLASSIFICATION_H
+#define CLASSIFICATION_H
 
 #include <opencv2/opencv.hpp>
 #include <vector>
@@ -34,6 +34,16 @@ std::string classifyStaticAction(const StaticFeatures& feats);
 std::string classifySequence(const SequenceFeatures& dyn_feats,
                              const std::vector<cv::Mat>& mask_sequence,
                              const std::vector<cv::Rect>& bbox_sequence);
+
+/**
+ * @brief Creates annotated copies of the input frames with the predicted action label.
+ *        Generates a cloned sequence where each frame has red text (the predicted action name) in the bottom-left corner.
+ * @param frames Constant reference to the input vector of frames (the ones with a bbox).
+ * @param action_name String representing the predicted action label (e.g., "boxing").
+ * @return std::vector<cv::Mat> Vector containing the new annotated frame clones.
+ */
+std::vector<cv::Mat> overlayActionOnFrames(const std::vector<cv::Mat>& frames, const std::string& action_name);
+
 
 
 #endif // CLASSIFICATION_H

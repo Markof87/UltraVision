@@ -99,8 +99,8 @@ std::string classifyDynamicAction(const SequenceFeatures& feats) {
 
 
 std::string classifySequence(const SequenceFeatures& dyn_feats,
-                                              const std::vector<cv::Mat>& mask_sequence,
-                                              const std::vector<cv::Rect>& bbox_sequence) 
+                             const std::vector<cv::Mat>& mask_sequence,
+                             const std::vector<cv::Rect>& bbox_sequence) 
 {
     // Macro router: separate dynamic and static actions
     bool is_dynamic = (dyn_feats.net_displacement > 25.0f || dyn_feats.avg_velocity > 4.0f);
@@ -111,4 +111,43 @@ std::string classifySequence(const SequenceFeatures& dyn_feats,
         StaticFeatures static_feats = computeStaticFeatures(mask_sequence, bbox_sequence);
         return classifyStaticAction(static_feats);
     }
+}
+
+
+std::vector<cv::Mat> overlayActionOnFrames(const std::vector<cv::Mat>& frames, const std::string& action_name) {
+    std::vector<cv::Mat> annotated_frames;
+    annotated_frames.reserve(frames.size());
+
+    const std::string text = "Action: " + action_name;
+    const int font_face = cv::FONT_HERSHEY_SIMPLEX;
+    
+    const double font_scale = 0.3;
+    const int thickness = 1;
+    const cv::Scalar text_color(0, 0, 255); // Red in BGR format
+
+    for (const auto& original_frame : frames) {
+        if (original_frame.empty()) {
+            annotated_frames.push_back(cv::Mat());
+            continue;
+        }
+
+        cv::Mat display_frame;
+        // Convert single-channel grayscale images to 3-channel BGR to allow color rendering
+        if (original_frame.channels() == 1) {
+            cv::cvtColor(original_frame, display_frame, cv::COLOR_GRAY2BGR);
+        } else {
+            display_frame = original_frame.clone();
+        }
+
+        // Anchor origin: 4 pixels from the left border, 6 pixels above the bottom edge
+        cv::Point text_origin(4, display_frame.rows - 6);
+
+        // Render the red text onto the cloned frame
+        cv::putText(display_frame, text, text_origin, font_face, font_scale, 
+                    text_color, thickness, cv::LINE_AA);
+
+        annotated_frames.push_back(display_frame);
+    }
+
+    return annotated_frames;
 }
