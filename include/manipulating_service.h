@@ -30,12 +30,10 @@ public:
      *        classifying the action, and returning annotated clones with the action label.
      * @param sequenceFrames Vector of raw frames belonging to a single sequence.
      * @param annotatedFrames Output vector storing cloned frames with bounding boxes and action text.
-     * @param outBboxes Optional output vector to store bounding boxes detected for each frame (needed to evaluate the performance metrics).
      * @return std::string The predicted action label.
      */
     std::string manipulateSequence(const std::vector<cv::Mat>& sequenceFrames, 
-                               std::vector<cv::Mat>& annotatedFrames,
-                               std::vector<cv::Rect>* outBboxes = nullptr);
+                               std::vector<cv::Mat>& annotatedFrames);
 };
 
 #endif // MANIPULATINGSERVICE_H
