@@ -1,3 +1,9 @@
+/**
+ * @file classification.h
+ * @brief File that contains the methods relative to the classification task (included the overlay of the action texts on the frames)
+ * @author Ivan Arduini
+ */
+
 #ifndef CLASSIFICATION_H
 #define CLASSIFICATION_H
 
@@ -23,7 +29,7 @@ std::string classifyDynamicAction(const SequenceFeatures& feats);
 std::string classifyStaticAction(const StaticFeatures& feats);
 
 /**
- * @brief Primary action classification router for the KTH dataset.
+ * @brief Primary action classification router for the dataset.
  *        Dispatches the sequence to dynamic or static classification routines
  *        based on global displacement and velocity bounds.
  * @param dyn_feats SequenceFeatures structure containing global kinematic metrics.

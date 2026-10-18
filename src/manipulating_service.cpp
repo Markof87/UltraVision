@@ -28,7 +28,8 @@ void ManipulatingService::manipulateFrame(const cv::Mat& inputFrame, cv::Mat& ou
 
 //ADDED
 std::string ManipulatingService::manipulateSequence(const std::vector<cv::Mat>& sequenceFrames, 
-                                                   std::vector<cv::Mat>& annotatedFrames)
+                                                   std::vector<cv::Mat>& annotatedFrames,
+                                                   std::vector<cv::Rect>* outBboxes = nullptr)
 {
     if (sequenceFrames.empty()) return "";
 
@@ -63,6 +64,11 @@ std::string ManipulatingService::manipulateSequence(const std::vector<cv::Mat>& 
 
     // 3. Clone frames and overlay the predicted action label as red text in the bottom-left corner
     annotatedFrames = overlayActionOnFrames(frames_with_bbox, predicted_action);
+
+    // Export computed bounding boxes if the caller provided an output container
+    if (outBboxes != nullptr) {
+        *outBboxes = bbox_sequence;
+    }
 
     return predicted_action;
 }

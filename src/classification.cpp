@@ -1,3 +1,9 @@
+/**
+ * @file performance_metrics.h
+ * @brief Implementation of the classification header file
+ * @author Ivan Arduini
+ */
+
 #include "classification.h"
 
 std::string classifyStaticAction(const StaticFeatures& feats) {
