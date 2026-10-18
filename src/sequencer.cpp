@@ -29,27 +29,27 @@ void Sequencer::run(const std::string& basePath, const std::string& windowName)
 
     while(true) //MODIFIED
     {
-    updateLoader(loadedSequence, basePath);
+        updateLoader(loadedSequence, basePath);
 
-    if(!annotatedSequence.empty())
-    {
-        cv::Mat currentFrame = annotatedSequence[frame_idx];
-
-        drawHUD(canvas, currentFrame, annotatedSequence.size());
-        cv::imshow(windowName, canvas);
-
-        if(play_state == 1)
+        if(!annotatedSequence.empty())
         {
-            frame_idx = (frame_idx + 1) % annotatedSequence.size();
+            cv::Mat currentFrame = annotatedSequence[frame_idx];
+
+            drawHUD(canvas, currentFrame, annotatedSequence.size());
+            cv::imshow(windowName, canvas);
+
+            if(play_state == 1)
+            {
+                frame_idx = (frame_idx + 1) % annotatedSequence.size();
+            }
         }
+
+        int delay = (play_state == 1) ? 40 : 100; // 40ms (~25 FPS)
+        char key = static_cast<char>(cv::waitKey(delay));
+
+        if(handleKeyboard(key, annotatedSequence.size()))
+            break;
     }
-
-    int delay = (play_state == 1) ? 40 : 100; // 40ms (~25 FPS)
-    char key = static_cast<char>(cv::waitKey(delay));
-
-    if(handleKeyboard(key, annotatedSequence.size()))
-        break;
-}
 
     cv::destroyWindow(windowName);
 }
@@ -73,7 +73,7 @@ void Sequencer::updateLoader(std::vector<cv::Mat>& loadedSequence, const std::st
         frame_idx = 0;
 
 
-        //ADDED
+        // ADDED: Process the selected sequence to detect bounding boxes and predict the action        
         ManipulatingService manipulating_service;
         currentPredictedAction = manipulating_service.manipulateSequence(loadedSequence, annotatedSequence);
         std::cout << "Predicted Action: " << currentPredictedAction << std::endl;

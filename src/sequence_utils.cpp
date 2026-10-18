@@ -7,168 +7,6 @@
 
 namespace fs = std::filesystem;
 
-std::vector<SequenceData> loadSequences(const std::string& main_folder) {
-    std::vector<SequenceData> all_sequences;
-
-    if (!fs::exists(main_folder) || !fs::is_directory(main_folder)) {
-        std::cerr << "[ERROR] Main folder does not exist: " << main_folder << std::endl;
-        return all_sequences;
-    }
-
-    std::cout << "[INFO] Scanning KTH dataset action sequences..." << std::endl;
-
-    for (const auto& action_folder : fs::directory_iterator(main_folder)) {
-        if (!action_folder.is_directory()) continue;
-        for (const auto& seq_folder : fs::directory_iterator(action_folder.path())) {
-            if (!seq_folder.is_directory()) continue;
-
-            std::string data_path = seq_folder.path().string() + "/data/";
-            if (!fs::exists(data_path)) continue;
-
-            std::vector<std::string> image_files;
-            for (const auto& entry : fs::directory_iterator(data_path)) {
-                if (entry.is_regular_file()) {
-                    std::string ext = entry.path().extension().string();
-                    if (ext == ".png" || ext == ".jpg") {
-                        image_files.push_back(entry.path().string());
-                    }
-                }
-            }
-            std::sort(image_files.begin(), image_files.end());
-
-            if (!image_files.empty()) {
-                SequenceData seq;
-                seq.action_name = action_folder.path().filename().string();
-                seq.seq_name = seq_folder.path().filename().string();
-                seq.image_files = image_files;
-                all_sequences.push_back(seq);
-            }
-        }
-    }
-
-    std::cout << "[INFO] Found " << all_sequences.size() << " total sequences." << std::endl;
-    return all_sequences;
-}
-
-bool visualizeSequence(const std::vector<cv::Mat>& sequence_frames,
-                       const std::vector<cv::Mat>& mask_sequence,
-                       const std::vector<cv::Rect>& bbox_sequence,
-                       const SequenceData& current_seq,
-                       const std::string& predicted_action,
-                       const SequenceFeatures& dyn_feats,
-                       const StaticFeatures& static_feats,
-                       const std::string& win_name,
-                       bool& skip_visualization,
-                       int& seq_index) {
-
-    if (skip_visualization) return false;
-
-    int frame_index = 0;
-    bool paused = false;
-    bool next_seq = false;
-    bool prev_seq = false;
-
-    // Check if the predicted action belongs to the dynamic or static branch
-    bool is_dynamic_pred = (predicted_action == "running" || 
-                            predicted_action == "jogging" || 
-                            predicted_action == "walking");
-
-    while (frame_index >= 0 && frame_index < static_cast<int>(sequence_frames.size())) {
-        cv::Mat frame = sequence_frames[frame_index];
-        cv::Rect bbox = bbox_sequence[frame_index];
-
-        cv::Mat frame_color;
-        cv::cvtColor(frame, frame_color, cv::COLOR_GRAY2BGR);
-        if (bbox.width > 0 && bbox.height > 0) {
-            cv::rectangle(frame_color, bbox, cv::Scalar(0, 0, 255), 2);
-        }
-
-        cv::Mat diff_color = cv::Mat::zeros(frame.size(), CV_8UC3);
-        if (frame_index > 0) {
-            cv::Mat diff;
-            cv::absdiff(mask_sequence[frame_index - 1], mask_sequence[frame_index], diff);
-            cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
-            cv::morphologyEx(diff, diff, cv::MORPH_OPEN, kernel);
-            cv::cvtColor(diff, diff_color, cv::COLOR_GRAY2BGR);
-            if (bbox.width > 0 && bbox.height > 0) {
-                cv::rectangle(diff_color, bbox, cv::Scalar(0, 255, 0), 2);
-            }
-        }
-
-        cv::Mat resized_frame, resized_diff;
-        cv::resize(frame_color, resized_frame, cv::Size(), 2.0, 2.0, cv::INTER_NEAREST);
-        cv::resize(diff_color, resized_diff, cv::Size(), 2.0, 2.0, cv::INTER_NEAREST);
-
-        // Explanatory side panel
-        cv::Mat explanation_panel(resized_frame.rows, 320, CV_8UC3, cv::Scalar(40, 40, 40));
-        
-        // Header & Predictions
-        cv::putText(explanation_panel, "ACTION DETAILS:", cv::Point(15, 30), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 255), 1);
-        cv::putText(explanation_panel, "Ground Truth: " + current_seq.action_name, cv::Point(15, 60), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(200, 200, 200), 1);
-        
-        cv::Scalar pred_color = (predicted_action == current_seq.action_name) ? cv::Scalar(0, 255, 0) : cv::Scalar(0, 0, 255);
-        cv::putText(explanation_panel, "Predicted: " + predicted_action, cv::Point(15, 90), cv::FONT_HERSHEY_SIMPLEX, 0.55, pred_color, 2);
-
-        // Conditional feature display based on action type
-        if (is_dynamic_pred) {
-            cv::putText(explanation_panel, "--- DYNAMIC FEATS ---", cv::Point(15, 130), cv::FONT_HERSHEY_SIMPLEX, 0.45, cv::Scalar(255, 255, 0), 1);
-            cv::putText(explanation_panel, "Disp: " + std::to_string(dyn_feats.net_displacement).substr(0, 5), cv::Point(15, 160), cv::FONT_HERSHEY_SIMPLEX, 0.45, cv::Scalar(220, 220, 220), 1);
-            cv::putText(explanation_panel, "AvgVel: " + std::to_string(dyn_feats.avg_velocity).substr(0, 4), cv::Point(15, 190), cv::FONT_HERSHEY_SIMPLEX, 0.45, cv::Scalar(220, 220, 220), 1);
-            cv::putText(explanation_panel, "Peaks: " + std::to_string(dyn_feats.stride_peaks), cv::Point(15, 220), cv::FONT_HERSHEY_SIMPLEX, 0.45, cv::Scalar(220, 220, 220), 1);
-        } else {
-            cv::putText(explanation_panel, "--- STATIC FEATS ---", cv::Point(15, 130), cv::FONT_HERSHEY_SIMPLEX, 0.45, cv::Scalar(0, 255, 255), 1);
-            cv::putText(explanation_panel, "Min CY: " + std::to_string(static_feats.min_cy).substr(0, 5), cv::Point(15, 160), cv::FONT_HERSHEY_SIMPLEX, 0.45, cv::Scalar(220, 220, 220), 1);
-            cv::putText(explanation_panel, "X Offset: " + std::to_string(static_feats.avg_x_offset).substr(0, 5), cv::Point(15, 190), cv::FONT_HERSHEY_SIMPLEX, 0.45, cv::Scalar(220, 220, 220), 1);
-            cv::putText(explanation_panel, "Y Range: " + std::to_string(static_feats.y_range).substr(0, 5), cv::Point(15, 220), cv::FONT_HERSHEY_SIMPLEX, 0.45, cv::Scalar(220, 220, 220), 1);
-        }
-
-        std::string info_seq = "Seq: " + current_seq.action_name + "/" + current_seq.seq_name;
-        std::string info_frame = "Frame: " + std::to_string(frame_index + 1) + "/" + std::to_string(sequence_frames.size()) + (paused ? " [PAUSED]" : "");
-        cv::putText(resized_frame, info_seq, cv::Point(15, 25), cv::FONT_HERSHEY_SIMPLEX, 0.45, cv::Scalar(0, 255, 0), 2);
-        cv::putText(resized_frame, info_frame, cv::Point(15, 45), cv::FONT_HERSHEY_SIMPLEX, 0.40, cv::Scalar(255, 255, 255), 1);
-
-        cv::Mat temp_combined, triple_view;
-        cv::hconcat(resized_frame, resized_diff, temp_combined);
-        cv::hconcat(temp_combined, explanation_panel, triple_view);
-
-        cv::imshow(win_name, triple_view);
-
-        char key = static_cast<char>(cv::waitKey(paused ? 0 : 50));
-
-        if (key == 'q' || key == 'Q') {
-            skip_visualization = true;
-            break;
-        } else if (key == ' ') {
-            paused = !paused;
-        } else if (key == 'p' || key == 'P') {
-            next_seq = true;
-            break;
-        } else if (key == 'o' || key == 'O') {
-            prev_seq = true;
-            break;
-        }
-
-        if (paused) {
-            if (key == 'm' || key == 'M') {
-                if (frame_index + 1 < static_cast<int>(sequence_frames.size())) frame_index++;
-            } else if (key == 'n' || key == 'N') {
-                if (frame_index > 0) frame_index--;
-            }
-        } else {
-            frame_index++;
-        }
-    }
-
-    if (next_seq) {
-        seq_index++;
-        return true;
-    } else if (prev_seq) {
-        seq_index--;
-        return true;
-    }
-    return false;
-}
-
 SequenceFeatures extractSequenceFeatures(const std::vector<cv::Mat>& mask_sequence, 
                                          const std::vector<cv::Rect>& bbox_sequence) {
 
@@ -265,61 +103,40 @@ StaticFeatures computeStaticFeatures(const std::vector<cv::Mat>& mask_sequence,
     return feats;
 }
 
-void printSequenceFeaturesTable(const std::string& seq_id, const SequenceFeatures& feats) {
-    std::cout << std::left << std::setw(25) << seq_id 
-              << " | Disp: " << std::setw(6) << std::fixed << std::setprecision(1) << feats.net_displacement
-              << " | AvgVel: " << std::setw(5) << feats.avg_velocity
-              << " | Peaks: " << std::setw(3) << feats.stride_peaks
-              << std::endl;
-}
+std::vector<cv::Mat> overlayActionOnFrames(const std::vector<cv::Mat>& frames, const std::string& action_name) {
+    std::vector<cv::Mat> annotated_frames;
+    annotated_frames.reserve(frames.size());
 
-void printStaticFeaturesTable(const std::string& seq_id, const StaticFeatures& feats) {
-    std::cout << std::left << std::setw(25) << seq_id 
-              << " | MinCY: " << std::setw(5) << std::fixed << std::setprecision(3) << feats.min_cy
-              << " | YRange: " << std::setw(5) << feats.y_range
-              << " | XOffset: " << std::setw(5) << feats.avg_x_offset
-              << std::endl;
-}
+    const std::string text = "Action: " + action_name;
+    const int font_face = cv::FONT_HERSHEY_SIMPLEX;
+    
+    const double font_scale = 0.3;
+    const int thickness = 1;
+    const cv::Scalar text_color(0, 0, 255); // Red in BGR format
 
-void printFinalReport(int total_processed, int total_correct,
-                      const std::map<std::string, int>& class_total,
-                      const std::map<std::string, int>& class_correct,
-                      const std::vector<ErrorRecord>& error_log) {
-                        
-    std::cout << "\n\n==========================================" << std::endl;
-    std::cout << "         FINAL EVALUATION SUMMARY         " << std::endl;
-    std::cout << "==========================================" << std::endl;
-    std::cout << " Total sequences analyzed : " << total_processed << std::endl;
-    std::cout << " Correctly classified     : " << total_correct << std::endl;
-    
-    float global_accuracy = (total_processed > 0) ? (static_cast<float>(total_correct) / total_processed) * 100.0f : 0.0f;
-    std::cout << " Global Accuracy          : " << std::fixed << std::setprecision(2) << global_accuracy << "%" << std::endl;
-    std::cout << "------------------------------------------" << std::endl;
-    
-    std::cout << " Per-Class Breakdown:" << std::endl;
-    for (const auto& pair : class_total) {
-        std::string cls = pair.first;
-        int tot = pair.second;
-        int cor = (class_correct.find(cls) != class_correct.end()) ? class_correct.at(cls) : 0;
-        float acc = (tot > 0) ? (static_cast<float>(cor) / tot) * 100.0f : 0.0f;
-        std::cout << "  - " << std::left << std::setw(15) << cls << ": " 
-                  << cor << "/" << tot << " correct (" << acc << "%)" << std::endl;
-    }
-    
-    std::cout << "------------------------------------------" << std::endl;
-    std::cout << " Error Log (" << error_log.size() << " total errors):" << std::endl;
-    if (error_log.empty()) {
-        std::cout << "  No classification errors detected!" << std::endl;
-    } else {
-        std::map<std::string, int> confusion_matrix;
-        for (const auto& err : error_log) {
-            std::string key = "Ground Truth [" + err.real_action + "] mistaken for [" + err.predicted_action + "]";
-            confusion_matrix[key]++;
+    for (const auto& original_frame : frames) {
+        if (original_frame.empty()) {
+            annotated_frames.push_back(cv::Mat());
+            continue;
         }
 
-        for (const auto& conf : confusion_matrix) {
-            std::cout << "  * " << conf.first << " -> " << conf.second << " time(s)" << std::endl;
+        cv::Mat display_frame;
+        // Convert single-channel grayscale images to 3-channel BGR to allow color rendering
+        if (original_frame.channels() == 1) {
+            cv::cvtColor(original_frame, display_frame, cv::COLOR_GRAY2BGR);
+        } else {
+            display_frame = original_frame.clone();
         }
+
+        // Anchor origin: 4 pixels from the left border, 6 pixels above the bottom edge
+        cv::Point text_origin(4, display_frame.rows - 6);
+
+        // Render the red text onto the cloned frame
+        cv::putText(display_frame, text, text_origin, font_face, font_scale, 
+                    text_color, thickness, cv::LINE_AA);
+
+        annotated_frames.push_back(display_frame);
     }
-    std::cout << "==========================================" << std::endl;
+
+    return annotated_frames;
 }

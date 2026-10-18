@@ -26,7 +26,7 @@ void ManipulatingService::manipulateFrame(const cv::Mat& inputFrame, cv::Mat& ou
 }
 
 
-//ADDED
+
 std::string ManipulatingService::manipulateSequence(const std::vector<cv::Mat>& sequenceFrames, 
                                                    std::vector<cv::Mat>& annotatedFrames)
 {

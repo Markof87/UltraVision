@@ -29,9 +29,9 @@ std::string classifyDynamicAction(const SequenceFeatures& feats);
 std::string classifyStaticAction(const StaticFeatures& feats);
 
 /**
- * @brief Primary action classification router for the dataset.
- *        Dispatches the sequence to dynamic or static classification routines
- *        based on global displacement and velocity bounds.
+ * @brief Classifies the sequence through a two-stage hierarchical pipeline.
+ *        Routes the action into dynamic or static domain based on global motion metrics,
+ *        then delegates final label prediction to classifyDynamicAction or classifyStaticAction.
  * @param dyn_feats SequenceFeatures structure containing global kinematic metrics.
  * @param mask_sequence Vector of binary foreground/motion masks across all frames.
  * @param bbox_sequence Vector of tracked bounding boxes across all frames.
@@ -40,16 +40,6 @@ std::string classifyStaticAction(const StaticFeatures& feats);
 std::string classifySequence(const SequenceFeatures& dyn_feats,
                              const std::vector<cv::Mat>& mask_sequence,
                              const std::vector<cv::Rect>& bbox_sequence);
-
-/**
- * @brief Creates annotated copies of the input frames with the predicted action label.
- *        Generates a cloned sequence where each frame has red text (the predicted action name) in the bottom-left corner.
- * @param frames Constant reference to the input vector of frames (the ones with a bbox).
- * @param action_name String representing the predicted action label (e.g., "boxing").
- * @return std::vector<cv::Mat> Vector containing the new annotated frame clones.
- */
-std::vector<cv::Mat> overlayActionOnFrames(const std::vector<cv::Mat>& frames, const std::string& action_name);
-
 
 
 #endif // CLASSIFICATION_H

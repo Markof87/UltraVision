@@ -24,7 +24,6 @@ public:
     static void manipulateFrame(const cv::Mat& inputFrame, cv::Mat& outputMask);
 
 
-    //ADDED
     /**
      * @brief Processes an entire sequence of frames, computing masks, drawing bounding boxes,
      *        classifying the action, and returning annotated clones with the action label.
