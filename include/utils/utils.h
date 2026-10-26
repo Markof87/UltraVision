@@ -63,6 +63,7 @@ namespace Utils
      * @param scenarioId The ID of the scenario (e.g., 1, 2, 3, 4).
      */
     void addResource(std::vector<cv::Mat>& dataset, const std::string& basePath, const std::string& action, int personId, int scenarioId);
+    void addResource2(std::vector<cv::Mat>& dataset, const std::string& basePath, const std::string& action, int personId, int scenarioId);
 
     /**
      * @brief Displays the graphical user interface (GUI) for selecting actions, persons, and scenarios.
