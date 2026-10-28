@@ -5,6 +5,11 @@
  */
 
 #include "performance_metrics.h"
+#include "manipulating_service.h"
+#include "segmentation_alg.h"
+#include "bbox.h"
+#include <filesystem>
+#include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -120,6 +125,101 @@ bool PerformanceMetrics::exportToTXT(const std::string& filepath) const {
     }
 
     return true;
+}
+
+bool PerformanceMetrics::exportCompleteEvaluation(const std::string& csvFilePath, const std::string& txtFilePath) {
+    reset(); // Clear any previous records to ensure a new global evaluation
+
+    std::string base_sequences_path = "../data/Sequences";
+    if (!std::filesystem::exists(base_sequences_path)) {
+        std::cerr << "[PerformanceMetrics] Error: Sequences base path not found at " << base_sequences_path << std::endl;
+        return false;
+    }
+
+    ManipulatingService manipulator;
+    int processed_sequences_count = 0;
+
+    // Iteration through each action directory (e.g. boxing, walking, etc.)
+    for (const auto& action_entry : std::filesystem::directory_iterator(base_sequences_path)) {
+        if (!action_entry.is_directory()) continue; // Skip non-directory entries
+        std::string action_name = action_entry.path().filename().string();
+
+        // Iteration through each sequence instance for the current action (e.g. p1_d1, ..., p2_d1, ..., p3_d4)
+        for (const auto& seq_entry : std::filesystem::directory_iterator(action_entry.path())) {
+            if (!seq_entry.is_directory()) continue; // Skip non-directory entries
+            std::string seq_id = seq_entry.path().filename().string();
+            std::string seq_data_path = seq_entry.path().string() + "/data";
+
+            if (!std::filesystem::exists(seq_data_path)) continue;
+
+            // Frame collection (sorting frame paths alphabetically)
+            std::vector<std::string> frame_paths;
+            for (const auto& frame_file : std::filesystem::directory_iterator(seq_data_path)) {
+                frame_paths.push_back(frame_file.path().string());
+            }
+            std::sort(frame_paths.begin(), frame_paths.end());
+
+
+            // Load sorted frames into memory
+            std::vector<cv::Mat> sequence_frames;
+            sequence_frames.reserve(frame_paths.size());
+            for (const auto& path : frame_paths) {
+                cv::Mat frame = cv::imread(path);
+                if (!frame.empty()) {
+                    sequence_frames.push_back(frame);
+                }
+            }
+
+            if (sequence_frames.empty()) continue;
+
+            // Sequence processing (using the manipulation service)
+            std::vector<cv::Mat> annotated_frames;
+            std::string predicted_action = manipulator.manipulateSequence(sequence_frames, annotated_frames);
+
+            GroundTruthAnnotation gt;
+            std::string gt_filepath = seq_entry.path().string() + "/labels/ground_truth.txt";            
+            double current_iou = 0.0;
+            int gt_class_id = 0;
+
+            if (loadGroundTruth(gt_filepath, gt)) {
+                gt_class_id = gt.class_id;
+
+                cv::Mat frame_20 = sequence_frames[19];
+                cv::Mat mask_20;
+                static SegmentationAlg seg_alg;
+                seg_alg.Segmentation(frame_20, mask_20);
+                cv::Mat dummy_frame = frame_20.clone();
+                cv::Rect raw_bbox = Bbox::bbox_func(mask_20, dummy_frame);
+
+                // Convert cv::Rect to cv::Rect2f to match computeIoU signature
+                cv::Rect2f predicted_box_at_20 = static_cast<cv::Rect2f>(raw_bbox);
+
+                current_iou = computeIoU(predicted_box_at_20, gt.bounding_box);
+            }
+
+            // Build and add the evaluation record
+            SequenceEvaluationRecord record;
+            record.sequence_id = seq_id;
+            record.action_name = predicted_action;
+
+            record.ground_truth_class = gt_class_id; 
+            record.predicted_class = 0;  
+            record.is_correct = (record.action_name == action_name);
+            record.iou_median_frame = current_iou; 
+
+            addRecord(record);
+            processed_sequences_count++;
+        }
+    }
+
+    std::cout << "[PerformanceMetrics] Batch evaluation completed. Processed " 
+              << processed_sequences_count << " sequences." << std::endl;
+
+    // Export results to both CSV and TXT files
+    bool csv_success = exportToCSV(csvFilePath);
+    bool txt_success = exportToTXT(txtFilePath);
+
+    return csv_success && txt_success;
 }
 
 void PerformanceMetrics::reset() {

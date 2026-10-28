@@ -93,13 +93,21 @@ public:
      */
     bool exportToTXT(const std::string& filepath) const;
 
+   /**
+     * @brief Automatically evaluates the entire dataset, aggregates records, and exports CSV and TXT reports.
+     * @param csvFilePath Path where the output CSV report will be saved.
+     * @param txtFilePath Path where the output TXT report will be saved.
+     * @return bool True if evaluation and export succeed, false otherwise.
+     */
+    bool exportCompleteEvaluation(const std::string& csvFilePath, const std::string& txtFilePath);
+
     /**
      * @brief Clears all stored records.
      */
     void reset();
 
 private:
-    std::vector<SequenceEvaluationRecord> records; ///< Aggregated evaluation outcomes
+    std::vector<SequenceEvaluationRecord> records; // Aggregated evaluation outcomes
 };
 
 #endif // PERFORMANCE_METRICS_H

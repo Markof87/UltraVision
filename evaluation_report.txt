@@ -1,0 +1,82 @@
+=====================================================
+               LOCALIZATION REPORT                   
+=====================================================
+
+Total Evaluated Sequences : 72
+Mean IoU (Frame 20)       : 0.7279
+
+-----------------------------------------------------
+ Per-Sequence IoU Breakdown:                         
+-----------------------------------------------------
+[person02_jogging_d3] Action: jogging        | IoU (Frame 20): 0.7749
+[person01_jogging_d1] Action: jogging        | IoU (Frame 20): 0.7928
+[person02_jogging_d4] Action: jogging        | IoU (Frame 20): 0.7169
+[person03_jogging_d2] Action: walking        | IoU (Frame 20): 0.4864
+[person02_jogging_d2] Action: jogging        | IoU (Frame 20): 0.7568
+[person03_jogging_d3] Action: jogging        | IoU (Frame 20): 0.7466
+[person01_jogging_d2] Action: jogging        | IoU (Frame 20): 0.7376
+[person01_jogging_d3] Action: jogging        | IoU (Frame 20): 0.7421
+[person02_jogging_d1] Action: jogging        | IoU (Frame 20): 0.7794
+[person03_jogging_d1] Action: jogging        | IoU (Frame 20): 0.7067
+[person01_jogging_d4] Action: jogging        | IoU (Frame 20): 0.7778
+[person03_jogging_d4] Action: jogging        | IoU (Frame 20): 0.7090
+[person02_walking_d3] Action: jogging        | IoU (Frame 20): 0.8083
+[person01_walking_d3] Action: walking        | IoU (Frame 20): 0.8185
+[person01_walking_d1] Action: walking        | IoU (Frame 20): 0.7603
+[person02_walking_d1] Action: jogging        | IoU (Frame 20): 0.7868
+[person03_walking_d4] Action: walking        | IoU (Frame 20): 0.7618
+[person03_walking_d2] Action: walking        | IoU (Frame 20): 0.4921
+[person02_walking_d4] Action: walking        | IoU (Frame 20): 0.5185
+[person03_walking_d3] Action: walking        | IoU (Frame 20): 0.5283
+[person01_walking_d4] Action: walking        | IoU (Frame 20): 0.7381
+[person01_walking_d2] Action: walking        | IoU (Frame 20): 0.9369
+[person02_walking_d2] Action: walking        | IoU (Frame 20): 0.5946
+[person03_walking_d1] Action: walking        | IoU (Frame 20): 0.5208
+[person01_handwaving_d4] Action: handwaving     | IoU (Frame 20): 0.7683
+[person01_handwaving_d3] Action: handwaving     | IoU (Frame 20): 0.7880
+[person02_handwaving_d3] Action: handwaving     | IoU (Frame 20): 0.8199
+[person03_handwaving_d4] Action: handwaving     | IoU (Frame 20): 0.8918
+[person02_handwaving_d2] Action: handwaving     | IoU (Frame 20): 0.8001
+[person02_handwaving_d4] Action: handwaving     | IoU (Frame 20): 0.9243
+[person03_handwaving_d1] Action: handwaving     | IoU (Frame 20): 0.6471
+[person03_handwaving_d2] Action: handwaving     | IoU (Frame 20): 0.7770
+[person01_handwaving_d1] Action: handwaving     | IoU (Frame 20): 0.7247
+[person03_handwaving_d3] Action: handwaving     | IoU (Frame 20): 0.8823
+[person02_handwaving_d1] Action: handwaving     | IoU (Frame 20): 0.7892
+[person01_handwaving_d2] Action: handwaving     | IoU (Frame 20): 0.7770
+[person03_handclapping_d2] Action: handclapping   | IoU (Frame 20): 0.6669
+[person01_handclapping_d3] Action: handclapping   | IoU (Frame 20): 0.6990
+[person02_handclapping_d2] Action: handclapping   | IoU (Frame 20): 0.8207
+[person01_handclapping_d1] Action: handclapping   | IoU (Frame 20): 0.7874
+[person03_handclapping_d3] Action: handwaving     | IoU (Frame 20): 0.7835
+[person02_handclapping_d3] Action: handclapping   | IoU (Frame 20): 0.8026
+[person01_handclapping_d4] Action: boxing         | IoU (Frame 20): 0.7325
+[person01_handclapping_d2] Action: handclapping   | IoU (Frame 20): 0.8555
+[person03_handclapping_d4] Action: handclapping   | IoU (Frame 20): 0.6246
+[person02_handclapping_d4] Action: boxing         | IoU (Frame 20): 0.9403
+[person02_handclapping_d1] Action: handclapping   | IoU (Frame 20): 0.7771
+[person03_handclapping_d1] Action: handclapping   | IoU (Frame 20): 0.6808
+[person03_boxing_d3] Action: boxing         | IoU (Frame 20): 0.7200
+[person03_boxing_d2] Action: boxing         | IoU (Frame 20): 0.5383
+[person01_boxing_d3] Action: boxing         | IoU (Frame 20): 0.6803
+[person03_boxing_d1] Action: boxing         | IoU (Frame 20): 0.6775
+[person01_boxing_d4] Action: boxing         | IoU (Frame 20): 0.7099
+[person02_boxing_d1] Action: boxing         | IoU (Frame 20): 0.7386
+[person03_boxing_d4] Action: boxing         | IoU (Frame 20): 0.5377
+[person01_boxing_d2] Action: boxing         | IoU (Frame 20): 0.7463
+[person01_boxing_d1] Action: boxing         | IoU (Frame 20): 0.7050
+[person02_boxing_d4] Action: boxing         | IoU (Frame 20): 0.5106
+[person02_boxing_d3] Action: boxing         | IoU (Frame 20): 0.5419
+[person02_boxing_d2] Action: handclapping   | IoU (Frame 20): 0.6623
+[person01_running_d4] Action: running        | IoU (Frame 20): 0.7229
+[person02_running_d2] Action: running        | IoU (Frame 20): 0.7492
+[person03_running_d4] Action: running        | IoU (Frame 20): 0.7351
+[person02_running_d4] Action: running        | IoU (Frame 20): 0.8855
+[person01_running_d1] Action: running        | IoU (Frame 20): 0.7416
+[person03_running_d3] Action: running        | IoU (Frame 20): 0.7351
+[person02_running_d3] Action: jogging        | IoU (Frame 20): 0.7812
+[person01_running_d3] Action: running        | IoU (Frame 20): 0.8289
+[person02_running_d1] Action: jogging        | IoU (Frame 20): 0.8137
+[person01_running_d2] Action: jogging        | IoU (Frame 20): 0.7490
+[person03_running_d2] Action: running        | IoU (Frame 20): 0.5897
+[person03_running_d1] Action: running        | IoU (Frame 20): 0.5591

@@ -7,6 +7,7 @@
 #include "sequencer.h"
 #include "manipulating_service.h"
 #include "utils/utils.h"
+#include "performance_metrics.h"
 
 void Sequencer::run(const std::string& basePath, const std::string& windowName)
 {
@@ -122,7 +123,11 @@ void Sequencer::drawHUD(cv::Mat& canvas, const cv::Mat& currentFrame, size_t tot
 bool Sequencer::handleKeyboard(char key, size_t totalFrames)
 {
     if(key == 'q' || key == 27) // 'q' or ESC to quit
+    {
+        PerformanceMetrics metrics_eval;
+        metrics_eval.exportCompleteEvaluation("../evaluation_report.csv", "../evaluation_report.txt");
         return true;
+    }
     else if(key == 'p') // 'p' to toggle play/pause
         play_state = 1 - play_state; // Toggle between 0 and 1
     else if(key == 'm') // 'm' for next frame
