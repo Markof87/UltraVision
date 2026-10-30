@@ -52,14 +52,6 @@ public:
     ~PerformanceMetrics() = default;
 
     /**
-     * @brief Computes Intersection over Union (IoU) between two bounding boxes.
-     * @param bboxA First bounding box.
-     * @param bboxB Second bounding box.
-     * @return double IoU score in range [0.0, 1.0].
-     */
-    static double computeIoU(const cv::Rect2f& bboxA, const cv::Rect2f& bboxB);
-
-    /**
      * @brief Loads ground truth data (action ID and 20th frame box) from a text file.
      * @param filepath Path to the annotation .txt file.
      * @param annotation Output struct where parsed data are saved.
@@ -73,12 +65,53 @@ public:
      */
     void addRecord(const SequenceEvaluationRecord& record);
 
+
+    //=========================================
+    //  LOCALIZATION METRICS (BOUNDING BOX)  //
+    //=========================================
+    /**
+     * @brief Computes Intersection over Union (IoU) between two bounding boxes.
+     * @param bboxA First bounding box.
+     * @param bboxB Second bounding box.
+     * @return double IoU score in range [0.0, 1.0].
+     */
+    static double computeIoU(const cv::Rect2f& bboxA, const cv::Rect2f& bboxB);
+
     /**
      * @brief Calculates Mean Intersection over Union (mIoU) across all recorded sequences.
      * @return double Average IoU score.
      */
     double calculateMeanIoU() const;
 
+
+    //=========================================
+    //   CLASSIFICATION METRICS (CATEGORY)   //
+    //=========================================
+    /**
+     * @brief Computes the Global Accuracy of the system.
+     * @return double The global accuracy percentage (value between 0.0 and 100.0).
+     */
+    double computeGlobalAccuracy() const;
+
+    /**
+     * @brief Computes the F1-Score for each action class.
+     * @return std::vector<double> A vector containing the F1-Score for each class index.
+     */
+    std::vector<double> computeF1Scores() const;
+
+    /**
+     * @brief Computes the Confusion Matrix for the 6 action classes.
+     * @details Builds a 6x6 matrix where rows represent ground truth classes 
+     *          and columns represent predicted classes.
+     * @return std::vector<std::vector<int>> The 6x6 confusion matrix.
+     */
+    std::vector<std::vector<int>> computeConfusionMatrix() const;
+
+
+
+    //=========================================
+    //          EXPORT FUNCTIONS             //
+    //=========================================
     /**
      * @brief Exports all individual sequence evaluation records to a CSV file.
      * @param filepath Target output CSV destination path.

@@ -1,9 +1,31 @@
 =====================================================
-               LOCALIZATION REPORT                   
+                PERFORMANCE REPORT                   
 =====================================================
 
 Total Evaluated Sequences : 72
 Mean IoU (Frame 20)       : 0.7279
+Global Accuracy           : 86.11%
+
+-----------------------------------------------------
+ Per-Class F1-Scores:                                
+-----------------------------------------------------
+  - Boxing          (Class 1) : 0.8800
+  - Handclapping    (Class 2) : 0.8182
+  - Handwaving      (Class 3) : 0.9600
+  - Jogging         (Class 4) : 0.7857
+  - Running         (Class 5) : 0.8571
+  - Walking         (Class 6) : 0.8696
+
+-----------------------------------------------------
+ Confusion Matrix (Rows: GT, Cols: Predictions 1-6)  
+-----------------------------------------------------
+      C1    C2    C3    C4    C5    C6    
+C1  | 11    1     0     0     0     0     
+C2  | 2     9     1     0     0     0     
+C3  | 0     0     12    0     0     0     
+C4  | 0     0     0     11    0     1     
+C5  | 0     0     0     3     9     0     
+C6  | 0     0     0     2     0     10    
 
 -----------------------------------------------------
  Per-Sequence IoU Breakdown:                         

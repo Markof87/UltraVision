@@ -14,21 +14,8 @@
 #include <iomanip>
 #include <iostream>
 
-double PerformanceMetrics::computeIoU(const cv::Rect2f& bboxA, const cv::Rect2f& bboxB) {
-    cv::Rect2f intersection = bboxA & bboxB;  // Determines overlapping intersection rectangle
-    float intersection_area = intersection.area();
 
-    float union_area = bboxA.area() + bboxB.area() - intersection_area;  // Calculate union area
-
-
-    if (union_area <= 0.0f) {
-        return 0.0;
-    }
-
-    return static_cast<double>(intersection_area / union_area);  // Returns the IoU score
-}
-
-bool PerformanceMetrics::loadGroundTruth(const std::string& filepath, GroundTruthAnnotation& annotation) {
+bool PerformanceMetrics::loadGroundTruth(const std::string& filepath, GroundTruthAnnotation& gt) {
     std::ifstream file(filepath);
     if (!file.is_open()) {
         std::cerr << "[PerformanceMetrics] Error: Unable to open ground truth file at " << filepath << std::endl;
@@ -47,19 +34,36 @@ bool PerformanceMetrics::loadGroundTruth(const std::string& filepath, GroundTrut
         return false;
     }
 
-    annotation.class_id = class_id;
+    gt.class_id = class_id;
 
     // Convert center format (x_c, y_c, w, h) into top-left format (x, y, w, h) for cv::Rect2f
     float top_left_x = x_center - (width / 2.0f);
     float top_left_y = y_center - (height / 2.0f);
 
-    annotation.bounding_box = cv::Rect2f(top_left_x, top_left_y, width, height);
+    gt.bounding_box = cv::Rect2f(top_left_x, top_left_y, width, height);
 
     return true;
 }
 
 void PerformanceMetrics::addRecord(const SequenceEvaluationRecord& record) {
     records.push_back(record);
+}
+
+//=====================================================================================================================================
+//      LOCALIZATION METRICS (BOUNDING BOX)
+//=====================================================================================================================================
+double PerformanceMetrics::computeIoU(const cv::Rect2f& bboxA, const cv::Rect2f& bboxB) {
+    cv::Rect2f intersection = bboxA & bboxB;  // Determines overlapping intersection rectangle
+    float intersection_area = intersection.area();
+
+    float union_area = bboxA.area() + bboxB.area() - intersection_area;  // Calculate union area
+
+
+    if (union_area <= 0.0f) {
+        return 0.0;
+    }
+
+    return static_cast<double>(intersection_area / union_area);  // Returns the IoU score
 }
 
 double PerformanceMetrics::calculateMeanIoU() const {
@@ -75,6 +79,94 @@ double PerformanceMetrics::calculateMeanIoU() const {
     return total_iou / static_cast<double>(records.size());
 }
 
+
+//=====================================================================================================================================
+//      CLASSIFICATION METRICS (CATEGORY)
+//=====================================================================================================================================
+double PerformanceMetrics::computeGlobalAccuracy() const {
+    if (records.empty()) {
+        return 0.0;
+    }
+
+    int count = 0;
+    
+    for (const auto& record : records) {
+        if (record.is_correct) {
+            count++;
+        }
+    }
+
+    // Return the percentage of correct predictions over the total sequences
+    return (static_cast<double>(count) / records.size()) * 100.0;
+}
+
+std::vector<double> PerformanceMetrics::computeF1Scores() const {
+    std::vector<double> f1_scores(6, 0.0);
+    
+    for (int i = 0; i < 6; ++i) {
+        int class_id = i + 1;
+        int true_positives = 0;
+        int false_positives = 0;
+        int false_negatives = 0;
+
+        for (const auto& record : records) {
+            // Check if the actual ground truth action matches the current loop class
+            bool belongs_to_class = (record.ground_truth_class == class_id);
+            // Check if our predicted action matches the current loop class
+            bool is_predicted_as_class = (record.predicted_class == class_id);
+
+            if (belongs_to_class && is_predicted_as_class) {
+                true_positives++;
+            } else if (!belongs_to_class && is_predicted_as_class) {
+                false_positives++;
+            } else if (belongs_to_class && !is_predicted_as_class) {
+                false_negatives++;
+            }
+        }
+
+        double precision = 0.0;  // precision = TP / (TP + FP)
+        double recall = 0.0;     // recall = TP / (TP + FN)
+
+        if ((true_positives + false_positives) > 0) {
+            precision = static_cast<double>(true_positives) / (true_positives + false_positives);
+        }
+
+        if ((true_positives + false_negatives) > 0) {
+            recall = static_cast<double>(true_positives) / (true_positives + false_negatives);
+        }
+
+        if ((precision + recall) > 0.0) {
+            f1_scores[i] = 2.0 * (precision * recall) / (precision + recall);
+        }
+    }
+
+    return f1_scores;
+}
+
+std::vector<std::vector<int>> PerformanceMetrics::computeConfusionMatrix() const {
+    // Initialize a 6x6 matrix with zeros (rows: Ground Truth, cols: Predicted)
+    std::vector<std::vector<int>> confusion_matrix(6, std::vector<int>(6, 0));
+
+    // Populate the confusion matrix based on the recorded evaluations
+    for (const auto& record : records) {
+        // Ensure class IDs are within the valid range [1, 6]
+        if (record.ground_truth_class >= 1 && record.ground_truth_class <= 6 &&
+            record.predicted_class >= 1 && record.predicted_class <= 6) {
+            
+            int gt_idx = record.ground_truth_class - 1;
+            int pred_idx = record.predicted_class - 1;
+            
+            confusion_matrix[gt_idx][pred_idx]++;
+        }
+    }
+
+    return confusion_matrix;
+}
+
+
+//=====================================================================================================================================
+//      EXPORT FUNCTIONS
+//=====================================================================================================================================
 bool PerformanceMetrics::exportToCSV(const std::string& filepath) const {
     std::ofstream csv_file(filepath);
     if (!csv_file.is_open()) {
@@ -94,8 +186,32 @@ bool PerformanceMetrics::exportToCSV(const std::string& filepath) const {
     }
 
     double miou = calculateMeanIoU();
+    double global_accuracy = computeGlobalAccuracy();
+    std::vector<double> f1_scores = computeF1Scores();
+    std::vector<std::vector<int>> confusion_matrix = computeConfusionMatrix();
+
+    csv_file << "\n# --- SUMMARY METRICS ---\n";
+
     csv_file << "meanIoU,,,,,," << std::fixed << std::setprecision(4) << miou << "\n";
 
+    csv_file << "global_accuracy_percent,,,,,," << std::fixed << std::setprecision(2) << global_accuracy << "\n";
+
+    csv_file << "\n# --- PER-CLASS F1-SCORES ---\n";
+    csv_file << "class_id,class_name,f1_score\n";
+    std::vector<std::string> class_names = {"boxing", "handclapping", "handwaving", "jogging", "running", "walking"};
+    for (size_t i = 0; i < f1_scores.size(); ++i) {
+        csv_file << (i + 1) << "," << class_names[i] << "," << std::fixed << std::setprecision(4) << f1_scores[i] << "\n";
+    }
+
+    csv_file << "\n# --- CONFUSION MATRIX (Rows: GT, Cols: Pred) ---\n";
+    csv_file << ",Pred_C1,Pred_C2,Pred_C3,Pred_C4,Pred_C5,Pred_C6\n";
+    for (int i = 0; i < 6; ++i) {
+        csv_file << "GT_C" << (i + 1);
+        for (int j = 0; j < 6; ++j) {
+            csv_file << "," << confusion_matrix[i][j];
+        }
+        csv_file << "\n";
+    }
     return true;
 }
 
@@ -107,12 +223,49 @@ bool PerformanceMetrics::exportToTXT(const std::string& filepath) const {
     }
 
     double miou = calculateMeanIoU();
+    double global_accuracy = computeGlobalAccuracy();
+    std::vector<double> f1_scores = computeF1Scores();
+    std::vector<std::vector<int>> confusion_matrix = computeConfusionMatrix();
 
     txt_file << "=====================================================\n";
-    txt_file << "               LOCALIZATION REPORT                   \n";
+    txt_file << "                PERFORMANCE REPORT                   \n";
     txt_file << "=====================================================\n\n";
+
     txt_file << "Total Evaluated Sequences : " << records.size() << "\n";
-    txt_file << "Mean IoU (Frame 20)       : " << std::fixed << std::setprecision(4) << miou << "\n\n";
+    txt_file << "Mean IoU (Frame 20)       : " << std::fixed << std::setprecision(4) << miou << "\n";
+    txt_file << "Global Accuracy           : " << std::fixed << std::setprecision(2) << global_accuracy << "%\n\n";
+    
+    txt_file << "-----------------------------------------------------\n";
+    txt_file << " Per-Class F1-Scores:                                \n";
+    txt_file << "-----------------------------------------------------\n";
+    std::vector<std::string> class_names = {"Boxing", "Handclapping", "Handwaving", "Jogging", "Running", "Walking"};
+    for (size_t i = 0; i < f1_scores.size(); ++i) {
+        txt_file << "  - " << std::left << std::setw(15) << class_names[i] 
+                 << " (Class " << (i + 1) << ") : " << std::fixed << std::setprecision(4) << f1_scores[i] << "\n";
+    }
+    txt_file << "\n";
+
+    txt_file << "-----------------------------------------------------\n";
+    txt_file << " Confusion Matrix (Rows: GT, Cols: Predictions 1-6)  \n";
+    txt_file << "-----------------------------------------------------\n";
+    
+    // Print column headers with fixed width
+    txt_file << "      ";
+    for (int j = 1; j <= 6; ++j) {
+        txt_file << std::setw(6) << ("C" + std::to_string(j));
+    }
+    txt_file << "\n";
+
+    // Print rows with fixed width for each cell
+    for (int i = 0; i < 6; ++i) {
+        txt_file << "C" << (i + 1) << "  | ";
+        for (int j = 0; j < 6; ++j) {
+            txt_file << std::setw(6) << confusion_matrix[i][j];
+        }
+        txt_file << "\n";
+    }
+    txt_file << "\n";
+
     txt_file << "-----------------------------------------------------\n";
     txt_file << " Per-Sequence IoU Breakdown:                         \n";
     txt_file << "-----------------------------------------------------\n";
@@ -137,6 +290,10 @@ bool PerformanceMetrics::exportCompleteEvaluation(const std::string& csvFilePath
     }
 
     ManipulatingService manipulator;
+
+    const int total_sequences = 72;
+    std::cout << "[PerformanceMetrics] Evaluation started. Processing " << total_sequences << " valid sequences...\n";
+
     int processed_sequences_count = 0;
 
     // Iteration through each action directory (e.g. boxing, walking, etc.)
@@ -151,6 +308,11 @@ bool PerformanceMetrics::exportCompleteEvaluation(const std::string& csvFilePath
             std::string seq_data_path = seq_entry.path().string() + "/data";
 
             if (!std::filesystem::exists(seq_data_path)) continue;
+
+            processed_sequences_count++;
+            std::cout << "[Evaluation] Processing valid sequence [" << processed_sequences_count << "/" << total_sequences 
+                      << "] -> Action: " << std::left << std::setw(15) << action_name 
+                      << " | ID: " << std::left << std::setw(25) << seq_id << "\r" << std::flush;
 
             // Frame collection (sorting frame paths alphabetically)
             std::vector<std::string> frame_paths;
@@ -179,11 +341,16 @@ bool PerformanceMetrics::exportCompleteEvaluation(const std::string& csvFilePath
             GroundTruthAnnotation gt;
             std::string gt_filepath = seq_entry.path().string() + "/labels/ground_truth.txt";            
             double current_iou = 0.0;
+
             int gt_class_id = 0;
-
+            if (action_name == "boxing") gt_class_id = 1;
+            else if (action_name == "handclapping") gt_class_id = 2;
+            else if (action_name == "handwaving") gt_class_id = 3;
+            else if (action_name == "jogging") gt_class_id = 4;
+            else if (action_name == "running") gt_class_id = 5;
+            else if (action_name == "walking") gt_class_id = 6;
+                
             if (loadGroundTruth(gt_filepath, gt)) {
-                gt_class_id = gt.class_id;
-
                 cv::Mat frame_20 = sequence_frames[19];
                 cv::Mat mask_20;
                 static SegmentationAlg seg_alg;
@@ -202,22 +369,34 @@ bool PerformanceMetrics::exportCompleteEvaluation(const std::string& csvFilePath
             record.sequence_id = seq_id;
             record.action_name = predicted_action;
 
-            record.ground_truth_class = gt_class_id; 
-            record.predicted_class = 0;  
+            record.ground_truth_class = gt_class_id;
+
+            int pred_class_id = 0;
+            if (predicted_action == "boxing" || predicted_action == "Boxing") pred_class_id = 1;
+            else if (predicted_action == "handclapping" || predicted_action == "Handclapping") pred_class_id = 2;
+            else if (predicted_action == "handwaving" || predicted_action == "Handwaving") pred_class_id = 3;
+            else if (predicted_action == "jogging" || predicted_action == "Jogging") pred_class_id = 4;
+            else if (predicted_action == "running" || predicted_action == "Running") pred_class_id = 5;
+            else if (predicted_action == "walking" || predicted_action == "Walking") pred_class_id = 6;
+
+            record.predicted_class = pred_class_id;
+
             record.is_correct = (record.action_name == action_name);
             record.iou_median_frame = current_iou; 
 
             addRecord(record);
-            processed_sequences_count++;
         }
     }
 
-    std::cout << "[PerformanceMetrics] Batch evaluation completed. Processed " 
-              << processed_sequences_count << " sequences." << std::endl;
+    std::cout << "\n[PerformanceMetrics] Batch evaluation completed successfully. Generating reports..." << std::endl;
 
     // Export results to both CSV and TXT files
     bool csv_success = exportToCSV(csvFilePath);
     bool txt_success = exportToTXT(txtFilePath);
+
+    if (csv_success && txt_success) {
+        std::cout << "[PerformanceMetrics] Reports exported successfully to TXT and CSV." << std::endl;
+    }
 
     return csv_success && txt_success;
 }
